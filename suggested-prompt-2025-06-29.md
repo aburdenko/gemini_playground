@@ -47,6 +47,7 @@ def process_prescriptions(json_data):
     return add_bases(bases, details)
 ```
 
+
 ```json {
 "properties": {
 "taskName": {
@@ -234,4 +235,3 @@ INPUT_data:
     "medicineName": "HUMIRA PEN (2/BOX)"
   }
 ]
-"""

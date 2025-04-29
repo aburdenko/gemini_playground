@@ -20,16 +20,12 @@ DEFAULT_MODEL = "gemini-1.5-flash-latest" # Default model
 OUTPUT_SUFFIX = ".output.md"
 # Regex to find sections like # System Instructions, # Prompt, etc.
 SECTION_PATTERN = re.compile(r"^\s*#\s+([\w\s]+)\s*$", re.MULTILINE)
-# --- Add Schema Detection Regex ---
-# Looks for ```json ... ``` block anywhere in the content
-SCHEMA_EXTRACTION_PATTERN = re.compile(
-    r"\s*```json\s*(\{.*?\})\s*```",
-    re.DOTALL | re.IGNORECASE
-)
-# --- End Add Schema Detection Regex ---
+# --- REMOVED Schema Detection Regex ---
+# SCHEMA_EXTRACTION_PATTERN = re.compile( ... )
+# --- End REMOVED Schema Detection Regex ---
 
 
-# --- Add Schema Conversion Function ---
+# --- Schema Conversion Function (remains the same) ---
 def dict_to_proto_schema(schema_dict: dict) -> glm.Schema | None:
     """Converts a Python dictionary representing a JSON schema to a glm.Schema."""
     try:
@@ -94,7 +90,7 @@ def dict_to_proto_schema(schema_dict: dict) -> glm.Schema | None:
     except Exception as e:
         print(f"    Error converting dictionary to proto schema: {e}", file=sys.stderr)
         return None
-# --- End Add Schema Conversion Function ---
+# --- End Schema Conversion Function ---
 
 
 def parse_metadata_and_body(file_content):
@@ -120,50 +116,69 @@ def parse_metadata_and_body(file_content):
     return metadata_dict, body_content
 
 
+# --- Modified parse_sections Function ---
 def parse_sections(text_content):
-    """Parses the text content into sections based on headings and extracts schema."""
+    """
+    Parses the text content into sections based on headings.
+    Looks for a '# Controlled Output' section to extract the JSON schema.
+    """
     sections = {}
     last_pos = 0
-    current_section_name = "header"
+    # Use a generic name for content before the first heading, or handle it differently if needed
+    current_section_name = "initial_content"
 
+    # Iterate through headings to split content into sections
     for match in SECTION_PATTERN.finditer(text_content):
+        # Normalize the heading name (lowercase, underscores)
         section_name = match.group(1).strip().lower().replace(" ", "_")
         start, end = match.span()
+
+        # Capture content between the last heading (or start) and the current one
         section_content = text_content[last_pos:start].strip()
         if section_content:
             sections[current_section_name] = section_content
+
+        # Update for the next iteration
         current_section_name = section_name
         last_pos = end
 
+    # Capture the content after the last heading
     section_content = text_content[last_pos:].strip()
     if section_content:
         sections[current_section_name] = section_content
 
-    # --- Schema Extraction ---
+    # --- Schema Extraction from '# Controlled Output' section ---
     schema_dict = None
     proto_schema = None
-    schema_match = SCHEMA_EXTRACTION_PATTERN.search(text_content)
-    if schema_match:
-        schema_json_str = schema_match.group(1)
-        try:
-            schema_dict = json.loads(schema_json_str)
-            print("    JSON schema found and parsed.")
-            proto_schema = dict_to_proto_schema(schema_dict)
-            if proto_schema:
-                print("    Successfully converted schema to proto format.")
-        except json.JSONDecodeError as e:
-            print(f"    Warning: Found schema block but failed to parse JSON: {e}", file=sys.stderr)
-        except Exception as e:
-            print(f"    Warning: Error processing found schema: {e}", file=sys.stderr)
+    # Check if the 'controlled_output' section exists
+    if 'controlled_output' in sections:
+        schema_json_str = sections['controlled_output']
+        # Remove potential ```json ``` wrappers if they still exist for compatibility
+        schema_json_str = re.sub(r"^\s*```json\s*", "", schema_json_str, flags=re.IGNORECASE)
+        schema_json_str = re.sub(r"\s*```\s*$", "", schema_json_str)
+        schema_json_str = schema_json_str.strip() # Clean up whitespace
 
+        if schema_json_str: # Ensure there's content to parse
+            try:
+                schema_dict = json.loads(schema_json_str)
+                print("    JSON schema found in '# Controlled Output' section and parsed.")
+                proto_schema = dict_to_proto_schema(schema_dict)
+                if proto_schema:
+                    print("    Successfully converted schema to proto format.")
+            except json.JSONDecodeError as e:
+                print(f"    Warning: Found '# Controlled Output' section but failed to parse JSON: {e}", file=sys.stderr)
+            except Exception as e:
+                print(f"    Warning: Error processing schema from '# Controlled Output' section: {e}", file=sys.stderr)
+        else:
+             print("    Warning: Found '# Controlled Output' section, but it was empty.", file=sys.stderr)
+
+    # Return the parsed sections and the proto_schema (which will be None if not found/parsed)
     return sections, proto_schema
-    # --- End Schema Extraction ---
+# --- End Modified parse_sections Function ---
 
 
-# --- Modified Function Signature (removed flag) ---
 def call_gemini_with_prompt_file(prompt_filepath):
     """Processes a single prompt file and calls the Gemini API."""
-    # --- End Modified Function Signature ---
     try:
         filepath = Path(prompt_filepath)
         print(f"[{datetime.now()}] Processing prompt from: {filepath.name}")
@@ -173,15 +188,25 @@ def call_gemini_with_prompt_file(prompt_filepath):
         # 1. Parse Metadata and Body
         metadata, body = parse_metadata_and_body(file_content)
 
-        # 2. Parse Sections from Body and Extract Schema
+        # 2. Parse Sections from Body and Extract Schema (using new logic)
         sections, proto_schema = parse_sections(body) # Returns schema if found
 
         system_instructions = sections.get("system_instructions")
         user_prompt = sections.get("prompt")
 
         if not user_prompt:
-            print("    Error: Could not find a '# Prompt' section.", file=sys.stderr)
-            return
+            # If no # Prompt, maybe use 'initial_content' or the whole body?
+            # For now, let's stick to requiring # Prompt for clarity.
+            # user_prompt = sections.get("initial_content") # Alternative
+            if 'initial_content' in sections and not system_instructions:
+                 # If there's only initial content and no system instructions, maybe treat it as the prompt?
+                 # This logic can be complex. Sticking to requiring # Prompt is safer.
+                 print("    Warning: No '# Prompt' section found. Attempting to use initial content.", file=sys.stderr)
+                 user_prompt = sections.get('initial_content') # Be cautious with this fallback
+            if not user_prompt:
+                 print("    Error: Could not find a '# Prompt' section or suitable fallback.", file=sys.stderr)
+                 return
+
 
         print(f"    System Instructions (parsed): '{system_instructions[:50]}...' " if system_instructions else "    System Instructions: None")
         print(f"    User Prompt (parsed): '{user_prompt[:50]}...'")
@@ -194,14 +219,13 @@ def call_gemini_with_prompt_file(prompt_filepath):
             print(f"    Temperature: {temperature}")
 
         # --- Implicit Controlled Output Determination ---
-        # Controlled output is active if a valid schema was found and parsed
         activate_controlled_output = proto_schema is not None
-        print(f"    JSON Schema Found: {activate_controlled_output}")
+        print(f"    JSON Schema Found (in # Controlled Output): {activate_controlled_output}")
         print(f"    Controlled Output Active (JSON Mode): {activate_controlled_output}")
         # --- End Implicit Controlled Output Determination ---
 
 
-        # 4. Configure API Key / Credentials
+        # 4. Configure API Key / Credentials (remains the same)
         api_key = os.getenv('GEMINI_API_KEY')
         google_creds_env = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
 
@@ -224,24 +248,22 @@ def call_gemini_with_prompt_file(prompt_filepath):
                 return
 
 
-        # 5. Prepare Model and Generation Config
+        # 5. Prepare Model and Generation Config (remains the same)
         model = genai.GenerativeModel(model_name=model_name, system_instruction=system_instructions)
 
         generation_config_args = {}
         if temperature is not None:
             generation_config_args['temperature'] = temperature
 
-        # --- Modify Schema Activation Logic ---
         if activate_controlled_output: # Check if schema was successfully processed
             print("    Configuring model for JSON output with schema.")
             generation_config_args['response_mime_type'] = "application/json"
             generation_config_args['response_schema'] = proto_schema
-        # --- End Modify Schema Activation Logic ---
 
         generation_config = GenerationConfig(**generation_config_args) if generation_config_args else None
 
 
-        # 6. Call Gemini API
+        # 6. Call Gemini API (remains the same)
         print("    Calling Gemini API...")
         response = model.generate_content(
             user_prompt,
@@ -255,26 +277,26 @@ def call_gemini_with_prompt_file(prompt_filepath):
         )
         print("    API call complete.")
 
-        # 7. Process and Save Response
+        # 7. Process and Save Response (remains the same)
         output_filename = filepath.with_suffix(OUTPUT_SUFFIX)
         output_content = f"# Gemini Output for: {filepath.name}\n"
         output_content += f"## Model: {model_name}\n"
         output_content += f"## System Instructions Provided: {'Yes' if system_instructions else 'No'}\n"
         if temperature is not None:
              output_content += f"## Temperature: {temperature}\n"
-        # --- Add Controlled Output Status to Header ---
-        output_content += f"## Controlled Output Active (JSON Mode): {activate_controlled_output}\n" # Reflect implicit activation
-        # --- End Add Controlled Output Status to Header ---
-        output_content += f"## Timestamp: {datetime.now()}\n\n---\n\n"
+        output_content += f"## Controlled Output Active (JSON Mode): {activate_controlled_output}\n"
+        output_content += f"## Timestamp: {datetime.now()}\n\n"
+        output_content += f"## RAW OUTPUT: \n\n"
 
-        # Adjust Output Saving
         if activate_controlled_output and response.text:
              try:
-                  json.loads(response.text)
-                  output_content += f"```json\n{response.text}\n```\n"
+                  # Attempt to pretty-print the JSON for readability in the output file
+                  parsed_json = json.loads(response.text)
+                  pretty_json = json.dumps(parsed_json, indent=2)
+                  output_content += f"```json\n{pretty_json}\n```\n"
              except json.JSONDecodeError:
                   print("    Warning: Model output was not valid JSON despite schema request.", file=sys.stderr)
-                  output_content += f"```text\n{response.text}\n```\n"
+                  output_content += f"```text\n{response.text}\n```\n" # Save as text if not valid JSON
         elif response.text:
              output_content += response.text
         else:
@@ -306,14 +328,11 @@ def main():
                         type=str,
                         nargs='+',
                         help="Path to one or more prompt files to process.")
-    # --- Removed Controlled Output Argument ---
 
     args = parser.parse_args()
 
     for prompt_file in args.prompt_files:
-        # --- Pass only the file path ---
         call_gemini_with_prompt_file(prompt_file)
-        # --- End Pass only the file path ---
         print("-" * 20)
 
 if __name__ == "__main__":
