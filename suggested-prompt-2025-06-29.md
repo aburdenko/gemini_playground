@@ -47,7 +47,6 @@ def process_prescriptions(json_data):
     return add_bases(bases, details)
 ```
 
-
 ```json {
 "properties": {
 "taskName": {
@@ -126,7 +125,9 @@ Return the final JSON output with a unique key:value for each drug + rx number c
 
 *Nota Bene:* Only include `bilNotesSummary` and `genNotesFacts` for the drug mentioned in that unique drug + rx number combination.  For example, the `bilNotesSummary` for "Vitriol 2/Box Rx XXXXXXXX-XX" should only include mentions of any drug starting with "Vitriol 2/bBox XXXXXXXX-XX" and any drugs that are not mapped to a prescription number.
 
-If any data is missing, or is null, or the Python script fails to execute, return an error message indicating the issue. Do not return null values in the output JSON.
+If any data is missing, or the Python script fails to execute, return an error message indicating the issue. 
+
+Explain any null values in your returned JSON output.
 
 INPUT_data:
 [

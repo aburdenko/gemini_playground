@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Run with python3 ./.scripts/run_gemini_from_file.py suggested-prompt-2025-06-29.md
 
 import google.generativeai as genai
 import os
