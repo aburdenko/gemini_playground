@@ -43,7 +43,31 @@
                 "runningStatusMessage": "Running Agent for ${fileBasename}...",
                 "finishStatusMessage": "${fileBasename} processed by Agent."
             }
+            ,
+            {
+                "match": ".*\\.gemini\\.md$",
+                "cmd": ". ${workspaceFolder}/.scripts/configure.sh && gemini -f ${file} > ${file}.out",
+                "runIn": "terminal",
+                "runningStatusMessage": "Running Gemini CLI for ${fileBasename}...",
+                "finishStatusMessage": "Gemini CLI finished processing ${fileBasename}."
+            }
         ]
+    },
+    // --- Editor Folding Settings ---
+    // This enables custom folding regions for shell scripts and Python files
+    // based on the comment patterns used in this project.
+    "[shellscript]": {
+        "editor.foldingMarkers": {
+            // Creates a foldable region starting at a line like '# --- My Section ---'
+            // The region extends to the next start marker.
+            "start": "^\\s*# --- .* ---"
+        }
+    },
+    "[python]": {
+        "editor.foldingMarkers": {
+            // Creates a foldable region starting at a line like '# --- My Section ---'
+            "start": "^\\s*# --- .* ---"
+        }
     }
     // OR, for a generic "File Watcher" type extension, the config might look different.
     // Always consult the specific extension's documentation.

@@ -16,3 +16,5 @@ paul.prompt.*
 .vscode/exclusions_340b_rebate.yaml
 prompts/exclusions_340b_rebate.yaml
 templates/exclusions.prompt.template.md
+nohup.out
+.env
