@@ -22,6 +22,12 @@ from vertexai.preview import rag
 from vertexai.preview.generative_models import GenerativeModel, Tool
 from vertexai.generative_models import Part, GenerationConfig, HarmCategory, HarmBlockThreshold, SafetySetting
 
+# --- Define the project root as the parent directory of the .scripts folder ---
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+# --- Add necessary imports ---
+from prompt_manager import PromptManager
+
 # They are kept here for reference but are no longer used in the primary RAG path.
 from google.cloud import aiplatform
 from google.cloud import logging as cloud_logging
@@ -568,7 +574,7 @@ def run_evaluation_on_dataframe(eval_df: pd.DataFrame, metrics_to_run: List[str]
 
 # --- Retry Helper for API calls ---
 def generate_with_retry(model: "GenerativeModel", *args, **kwargs) -> Any:
-    """Calls model.generate_content with retry logic for ResourceExhausted errors."""
+    """Calls model.generate_content with retry logic for transient API errors."""
     from google.api_core import exceptions
     import random
 
@@ -577,18 +583,111 @@ def generate_with_retry(model: "GenerativeModel", *args, **kwargs) -> Any:
     for attempt in range(max_retries):
         try:
             return model.generate_content(*args, **kwargs)
-        except exceptions.ResourceExhausted as e:
+        except (exceptions.ResourceExhausted, exceptions.ServiceUnavailable) as e:
             if attempt < max_retries - 1:
                 # Exponential backoff with jitter
                 wait_time = (base_delay ** attempt) + (random.uniform(0, 1))
-                logger.warning(f"    ResourceExhausted error (429). Retrying in {wait_time:.2f} seconds... (Attempt {attempt + 1}/{max_retries})")
+                error_type = type(e).__name__
+                status_code = getattr(e, 'code', 'N/A')
+                logger.warning(f"    API returned {error_type} (Status: {status_code}). Retrying in {wait_time:.2f} seconds... (Attempt {attempt + 1}/{max_retries})")
                 time.sleep(wait_time)
             else:
-                logger.error(f"    API call failed after {max_retries} retries due to ResourceExhausted error.")
+                logger.error(f"    API call failed after {max_retries} retries due to a persistent transient error.")
                 raise e # Re-raise the exception after the final attempt
 # --- End Retry Helper ---
 
-def call_gemini_with_prompt_file(prompt_filepath: str, cloud_logging_enabled: bool):
+def setup_rag_tool(rag_engine_endpoint: str, metadata: Dict[str, Any]) -> Optional[Tool]: # noqa: E501
+    """
+    Sets up and returns a RAG tool based on the provided resource string.
+
+    Args:
+        rag_engine_endpoint: The resource name or display name for the RAG source.
+        metadata: The parsed metadata from the prompt file, used to get the model name for the ranker.
+
+    Returns:
+        A configured Vertex AI Tool for RAG, or None if setup fails.
+    """
+    logger.info("--- RAG Engine Processing ---")
+    try:
+        project_id = os.getenv("PROJECT_ID")
+        region = os.getenv("REGION", "us-central1")
+        if not project_id or not region:
+            raise ValueError("PROJECT_ID and REGION must be set for RAG Engine.")
+
+        # Initialize Vertex AI SDK (if not already done)
+        vertexai.init(project=project_id, location=region)
+
+        # Use the same model for the LLM Ranker as the main model for consistency
+        model_name_for_rag = metadata.get('model_name', os.getenv('GEMINI_MODEL_NAME', 'gemini-1.5-flash-latest'))
+        logger.info(f"    Configuring RAG with LLM Ranker using model: {model_name_for_rag}")
+        rag_retrieval_config = rag.RagRetrievalConfig(
+            top_k=10, # A sensible default
+            ranking=rag.Ranking(
+                llm_ranker=rag.LlmRanker(
+                    model_name=model_name_for_rag
+                )
+            )
+        )
+
+        rag_resource_string = rag_engine_endpoint.strip()
+        rag_store = None
+
+        # The new RAG API uses a single source type: VertexRagStore
+        # which can point to either a corpus or a vector search index.
+        
+        # Case 1: It's a full RagCorpus resource name
+        if "/ragCorpora/" in rag_resource_string or "/corpora/" in rag_resource_string:
+            logger.info(f"    Interpreting '{rag_resource_string}' as a RagCorpus resource name.")
+            rag_store = rag.VertexRagStore(
+                rag_resources=[
+                    rag.RagResource(
+                        rag_corpus=rag_resource_string,
+                    )
+                ],
+                rag_retrieval_config=rag_retrieval_config
+            )
+        
+        # Case 2: It's a full Vector Search Index resource name
+        elif "/indexes/" in rag_resource_string:
+            logger.info(f"    Interpreting '{rag_resource_string}' as a Vector Search Index resource name.")
+            rag_store = rag.VertexRagStore(
+                vector_search_index=rag_resource_string,
+                rag_retrieval_config=rag_retrieval_config
+            )
+
+        # Case 3: It's a display name for an Endpoint or Index
+        else:
+            logger.info(f"    Interpreting '{rag_resource_string}' as a display name. Searching for a matching Vector Search Endpoint in region '{region}'...")
+            aiplatform.init(project=project_id, location=region)
+            endpoints = aiplatform.MatchingEngineIndexEndpoint.list(
+                filter=f'display_name="{rag_resource_string}"'
+            )
+
+            if endpoints:
+                endpoint = endpoints[0]
+                if len(endpoints) > 1:
+                    logger.warning(f"    Found multiple endpoints with the same name. Using the first one: {endpoint.resource_name}")
+                logger.info(f"    Found endpoint: {endpoint.resource_name}")
+                if not endpoint.deployed_indexes:
+                    raise ValueError(f"Endpoint '{endpoint.resource_name}' has no deployed indexes.")
+                index_resource_name = endpoint.deployed_indexes[0].index
+                logger.info(f"    Using underlying index: {index_resource_name}")
+                rag_store = rag.VertexRagStore(vector_search_index=index_resource_name, rag_retrieval_config=rag_retrieval_config)
+            else:
+                raise ValueError(f"Could not find a RagCorpus or Vector Search resource matching '{rag_resource_string}' in region '{region}'.")
+
+        if rag_store:
+            logger.info("    Creating RAG retrieval tool...")
+            retrieval = rag.Retrieval(source=rag_store)
+            logger.info("--- End RAG Engine Processing ---")
+            return Tool.from_retrieval(retrieval)
+        
+    except Exception as e:
+        logger.error(f"    Error during RAG processing: {e}", exc_info=True)
+        logger.info("--- End RAG Engine Processing ---")
+    return None
+
+def call_gemini_with_prompt_file(prompt_filepath: str, cloud_logging_enabled: bool, dynamic_data_filepath: Optional[str] = None):
     """Processes a single prompt file and calls the Gemini API."""
     model_name = None  # Initialize to ensure it's available in the except block
     try:
@@ -599,7 +698,45 @@ def call_gemini_with_prompt_file(prompt_filepath: str, cloud_logging_enabled: bo
         filepath = Path(prompt_filepath)
         print(f"[{datetime.now()}] Processing prompt from: {filepath.name}") # Use print for top-level status
 
-        file_content = filepath.read_text()
+        file_content = ""
+        # --- New logic to handle YAML use case files ---
+        if filepath.suffix.lower() in ['.yaml', '.yml']:
+            logger.info(f"    Processing as YAML use case file: {filepath.name}")
+            try:
+                # Use the robustly defined PROJECT_ROOT to find the prompts directory
+                prompts_dir = PROJECT_ROOT / 'prompts'
+                if not prompts_dir.is_dir():
+                    # This is a fatal error if the project structure is incorrect.
+                    raise FileNotFoundError(f"The 'prompts' directory was not found at the expected location: {prompts_dir}")
+                
+                prompt_manager = PromptManager(template_dir=str(prompts_dir))
+                
+                runtime_data = None
+                if dynamic_data_filepath:
+                    logger.info(f"    Loading dynamic data from: {dynamic_data_filepath}")
+                    with open(dynamic_data_filepath, 'r') as f:
+                        # Load the raw JSON data. The PromptManager will now handle
+                        # stringifying any complex types.
+                        runtime_data = json.load(f)
+                
+                # The use_case_config_path must be relative to the `prompts` dir.
+                relative_yaml_path = Path(prompt_filepath).resolve().relative_to(prompts_dir.resolve())
+                
+                file_content = prompt_manager.create_prompt_from_use_case(
+                    use_case_config_path=str(relative_yaml_path),
+                    dynamic_data=runtime_data
+                )
+                logger.info("    Successfully generated prompt content from YAML template.")
+            except (ValueError, FileNotFoundError, ImportError, TypeError) as e:
+                logger.error(f"    Failed to process YAML use case file: {e}", exc_info=True)
+                # Create an error output file
+                model_name_for_error = os.getenv('GEMINI_MODEL_NAME', 'unknown-model')
+                output_filename = filepath.with_name(f"{filepath.stem}.{model_name_for_error}.output.md")
+                output_filename.write_text(f"# Gemini Output for: {filepath.name}\n\n---\n\nPROCESSING ERROR\nDetails: Failed to process YAML use case file. Error: {e}")
+                return
+        else:
+            # --- Existing logic for Markdown files ---
+            file_content = filepath.read_text()
 
         # 1. Parse Metadata and Body
         metadata, body = parse_metadata_and_body(file_content)
@@ -643,95 +780,7 @@ def call_gemini_with_prompt_file(prompt_filepath: str, cloud_logging_enabled: bo
         # The model then handles the retrieval and grounding automatically.
         rag_tool = None
         if rag_engine_endpoint:
-            logger.info("--- RAG Engine Processing ---")
-            try:
-                project_id = os.getenv("PROJECT_ID")
-                region = os.getenv("REGION", "us-central1")
-                if not project_id or not region:
-                    raise ValueError("PROJECT_ID and REGION must be set for RAG Engine.")
-
-                # Initialize Vertex AI SDK (if not already done)
-                vertexai.init(project=project_id, location=region)
-
-                # Use the same model for the LLM Ranker as the main model for consistency
-                model_name_for_rag = metadata.get('model_name', os.getenv('GEMINI_MODEL_NAME', 'gemini-1.5-flash-latest'))
-                logger.info(f"    Configuring RAG with LLM Ranker using model: {model_name_for_rag}")
-                rag_retrieval_config = rag.RagRetrievalConfig(
-                    top_k=10, # A sensible default
-                    ranking=rag.Ranking(
-                        llm_ranker=rag.LlmRanker(
-                            model_name=model_name_for_rag
-                        )
-                    )
-                )
-
-                rag_resource_string = rag_engine_endpoint.strip()
-                rag_store = None
-
-                # The new RAG API uses a single source type: VertexRagStore
-                # which can point to either a corpus or a vector search index.
-                
-                # Case 1: It's a full RagCorpus resource name
-                if "/ragCorpora/" in rag_resource_string or "/corpora/" in rag_resource_string:
-                    logger.info(f"    Interpreting '{rag_resource_string}' as a RagCorpus resource name.")
-                    rag_store = rag.VertexRagStore(
-                        rag_resources=[
-                            rag.RagResource(
-                                rag_corpus=rag_resource_string,
-                            )
-                        ],
-                        rag_retrieval_config=rag_retrieval_config
-                    )
-                
-                # Case 2: It's a full Vector Search Index resource name
-                elif "/indexes/" in rag_resource_string:
-                    logger.info(f"    Interpreting '{rag_resource_string}' as a Vector Search Index resource name.")
-                    rag_store = rag.VertexRagStore(
-                        vector_search_index=rag_resource_string,
-                        rag_retrieval_config=rag_retrieval_config
-                    )
-
-                # Case 3: It's a display name for an Endpoint or Index
-                else:
-                    logger.info(f"    Interpreting '{rag_resource_string}' as a display name. Searching for a matching Vector Search Endpoint in region '{region}'...")
-                    aiplatform.init(project=project_id, location=region)
-                    endpoints = aiplatform.MatchingEngineIndexEndpoint.list(
-                        filter=f'display_name="{rag_resource_string}"'
-                    )
-
-                    if endpoints:
-                        endpoint = endpoints[0]
-                        if len(endpoints) > 1:
-                            logger.warning(f"    Found multiple endpoints with the same name. Using the first one: {endpoint.resource_name}")
-                        logger.info(f"    Found endpoint: {endpoint.resource_name}")
-                        if not endpoint.deployed_indexes:
-                            raise ValueError(f"Endpoint '{endpoint.resource_name}' has no deployed indexes.")
-                        index_resource_name = endpoint.deployed_indexes[0].index
-                        logger.info(f"    Using underlying index: {index_resource_name}")
-                        rag_store = rag.VertexRagStore(vector_search_index=index_resource_name, rag_retrieval_config=rag_retrieval_config)
-                    else:
-                        # If no endpoint is found, maybe it's an index display name
-                        logger.info(f"    No endpoint found. Searching for a matching Vector Search Index with display name '{rag_resource_string}'...")
-                        indexes = aiplatform.MatchingEngineIndex.list(
-                            filter=f'display_name="{rag_resource_string}"'
-                        )
-                        if indexes:
-                            index = indexes[0]
-                            if len(indexes) > 1:
-                                logger.warning(f"    Found multiple indexes with the same name. Using the first one: {index.resource_name}")
-                            logger.info(f"    Found index: {index.resource_name}")
-                            rag_store = rag.VertexRagStore(vector_search_index=index.resource_name, rag_retrieval_config=rag_retrieval_config)
-                        else:
-                             raise ValueError(f"Could not find a RagCorpus, Vector Search Endpoint, or Vector Search Index matching '{rag_resource_string}' in region '{region}'.")
-
-                if rag_store:
-                    logger.info("    Creating RAG retrieval tool...")
-                    # The new API uses Tool.from_retrieval with rag.Retrieval
-                    retrieval = rag.Retrieval(source=rag_store)
-                    rag_tool = Tool.from_retrieval(retrieval)
-            except Exception as e:
-                logger.error(f"    Error during RAG processing: {e}", exc_info=True)
-            logger.info("--- End RAG Engine Processing ---")
+            rag_tool = setup_rag_tool(rag_engine_endpoint, metadata)
         
         
         
@@ -1284,7 +1333,14 @@ def main():
                              "        }\n"
                              "      }\n"
                              "    ]\n"
-                             "    ```"
+                             "    ```\n\n"
+                             "YAML Use Cases:\n"
+                             "  You can also provide a path to a .yaml use case configuration file.\n"
+                             "  This requires the `prompts/` directory structure to be in place.\n"
+                             "  Example: ./.scripts/run_gemini_from_file.py prompts/use_cases/exclusions_340b_rebate.yaml --dynamic-data prompts/use_cases/exclusions_data.json"
+                        )
+    parser.add_argument("--dynamic-data", type=str, default=None,
+                        help="Path to a JSON file containing dynamic data for YAML-based prompt templates."
                         )
 
     args = parser.parse_args()
@@ -1301,8 +1357,8 @@ def main():
         # Use print for overall progress, logger for details/warnings/errors
         print(f"Starting processing for {len(args.prompt_files)} file(s)...")
         for prompt_file in args.prompt_files:
-            # Pass the logging status to the processing function
-            call_gemini_with_prompt_file(prompt_file, cloud_logging_enabled)
+            # Pass the logging status and dynamic data path to the processing function
+            call_gemini_with_prompt_file(prompt_file, cloud_logging_enabled, args.dynamic_data)
             print("-" * 30) # Separator between files
     finally:
         # Explicitly flush the handler before closing the client to ensure all

@@ -30,6 +30,13 @@
                 "finishStatusMessage": "${fileBasename} processed by Gemini."
             },
             {
+            // This command will run for any .yaml or .yml file saved directly within the prompts/ directory.
+                "match": ".*\\/prompts\\/[^/]+\\.ya?ml$",
+                "runIn": "terminal", // Runs in the integrated terminal
+                // It executes the run_gemini_from_file.py script, passing the saved file's path as an argument.
+                "cmd": ". ${workspaceFolder}/.scripts/configure.sh && rm -f ${fileBasename}.output.md && . ${workspaceFolder}/.venv/python3.12/bin/activate && .venv/python3.12/bin/python3 ${workspaceRoot}/.scripts/run_gemini_from_file.py ${file}"
+            },
+            {
                 "match": ".*agent.*\\.md$", // Match any file containing 'agent' and ending in .md
                 "cmd": ". ${workspaceFolder}/.scripts/configure.sh && rm -f ${fileDirname}/${fileBasenameNoExt}.output.md && . ${workspaceFolder}/.venv/python3.12/bin/activate && .venv/python3.12/bin/python3 ${workspaceFolder}/.scripts/run_agent.py ${file}",
                 "runIn": "terminal",
