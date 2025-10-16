@@ -1,5 +1,6 @@
-google-generativeai
-google-cloud-aiplatform
+
+google-generativeai<=1.40.0
+google-cloud-aiplatform[rag]>=1.55.0
 google-cloud-storage
 google-cloud-logging
 requests
@@ -12,3 +13,5 @@ scikit-learn
 fsspec
 tabulate
 PyYAML
+google-adk
+google.adk.integrations

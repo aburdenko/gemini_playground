@@ -1,8 +1,5 @@
 # Usage: source .scripts/configure.sh
-git config --global user.email "aburdenko@yahoo.com"
-git config --global user.name "Alex Burdenko"
-
-if ! command -v gemini &> /dev/null; then
+ if ! command -v gemini &> /dev/null; then
   echo "Gemini CLI not found. Installing globally..."
   sudo npm install -g @google/gemini-cli
 else
@@ -23,6 +20,16 @@ fi
 # This pipeline filters out full-line comments, then strips inline comments,
 # then exports the remaining VAR=value pairs.
 export $(grep -v '^#' "$ENV_FILE" | sed 's/#.*//' | xargs)
+
+# --- Git User Configuration ---
+# Set git user.name and user.email if they are defined in the .env file.
+if [ -n "$GIT_USER_NAME" ] && [ -n "$GIT_USER_EMAIL" ]; then
+  echo "Configuring git user name and email..."
+  git config --global user.name "$GIT_USER_NAME"
+  git config --global user.email "$GIT_USER_EMAIL"
+else
+  echo "Skipping git user configuration (GIT_USER_NAME or GIT_USER_EMAIL not set in .env)."
+fi
 
 # --- Google Credentials Setup ---
 # This section determines the GCP Project ID and sets up credentials.
