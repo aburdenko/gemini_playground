@@ -1,0 +1,17 @@
+google-generativeai
+google-cloud-aiplatform
+google-cloud-storage
+google-cloud-logging
+requests
+gcsfs
+pypdf
+matplotlib 
+numpy
+pandas
+scikit-learn
+fsspec
+tabulate
+PyYAML
+google-adk
+google-adk[eval]
+poetry

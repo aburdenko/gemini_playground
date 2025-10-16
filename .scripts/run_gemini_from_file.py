@@ -698,45 +698,46 @@ def call_gemini_with_prompt_file(prompt_filepath: str, cloud_logging_enabled: bo
         filepath = Path(prompt_filepath)
         print(f"[{datetime.now()}] Processing prompt from: {filepath.name}") # Use print for top-level status
 
+        # --- Unified prompt generation logic ---
         file_content = ""
-        # --- New logic to handle YAML use case files ---
-        if filepath.suffix.lower() in ['.yaml', '.yml']:
-            logger.info(f"    Processing as YAML use case file: {filepath.name}")
-            try:
-                # Use the robustly defined PROJECT_ROOT to find the prompts directory
-                prompts_dir = PROJECT_ROOT / 'prompts'
-                if not prompts_dir.is_dir():
-                    # This is a fatal error if the project structure is incorrect.
-                    raise FileNotFoundError(f"The 'prompts' directory was not found at the expected location: {prompts_dir}")
-                
-                prompt_manager = PromptManager(template_dir=str(prompts_dir))
-                
-                runtime_data = None
-                if dynamic_data_filepath:
-                    logger.info(f"    Loading dynamic data from: {dynamic_data_filepath}")
-                    with open(dynamic_data_filepath, 'r') as f:
-                        # Load the raw JSON data. The PromptManager will now handle
-                        # stringifying any complex types.
-                        runtime_data = json.load(f)
-                
-                # The use_case_config_path must be relative to the `prompts` dir.
-                relative_yaml_path = Path(prompt_filepath).resolve().relative_to(prompts_dir.resolve())
-                
+        try:
+            prompts_dir = PROJECT_ROOT / 'prompts'
+            if not prompts_dir.is_dir():
+                raise FileNotFoundError(f"The 'prompts' directory was not found at the expected location: {prompts_dir}")
+
+            prompt_manager = PromptManager(template_dir=str(prompts_dir))
+
+            runtime_data = None
+            if dynamic_data_filepath:
+                logger.info(f"    Loading dynamic data from: {dynamic_data_filepath}")
+                with open(dynamic_data_filepath, 'r') as f:
+                    runtime_data = json.load(f)
+
+            relative_path = filepath.resolve().relative_to(prompts_dir.resolve())
+
+            if filepath.suffix.lower() in ['.yaml', '.yml']:
+                logger.info(f"    Processing as YAML use case file: {filepath.name}")
                 file_content = prompt_manager.create_prompt_from_use_case(
-                    use_case_config_path=str(relative_yaml_path),
+                    use_case_config_path=str(relative_path),
                     dynamic_data=runtime_data
                 )
-                logger.info("    Successfully generated prompt content from YAML template.")
-            except (ValueError, FileNotFoundError, ImportError, TypeError) as e:
-                logger.error(f"    Failed to process YAML use case file: {e}", exc_info=True)
-                # Create an error output file
-                model_name_for_error = os.getenv('GEMINI_MODEL_NAME', 'unknown-model')
-                output_filename = filepath.with_name(f"{filepath.stem}.{model_name_for_error}.output.md")
-                output_filename.write_text(f"# Gemini Output for: {filepath.name}\n\n---\n\nPROCESSING ERROR\nDetails: Failed to process YAML use case file. Error: {e}")
-                return
-        else:
-            # --- Existing logic for Markdown files ---
-            file_content = filepath.read_text()
+                logger.info("    Successfully generated prompt content from YAML use case.")
+            else:
+                logger.info(f"    Processing as a potential template file with companion YAML: {filepath.name}")
+                file_content = prompt_manager.generate_prompt_from_template_with_companion_yaml(
+                    template_name=str(relative_path),
+                    dynamic_data=runtime_data
+                )
+                logger.info("    Successfully generated prompt content using convention-based templating.")
+
+        except (ValueError, FileNotFoundError, ImportError, TypeError, json.JSONDecodeError) as e:
+            logger.error(f"    Failed to generate prompt content for '{filepath.name}': {e}", exc_info=True)
+            # Create an error output file
+            model_name_for_error = os.getenv('GEMINI_MODEL_NAME', 'unknown-model')
+            output_filename = filepath.with_name(f"{filepath.stem}.{model_name_for_error}.output.md")
+            output_filename.write_text(f"# Gemini Output for: {filepath.name}\n\n---\n\nPROCESSING ERROR\nDetails: Failed to generate prompt content. Error: {e}")
+            return
+
 
         # 1. Parse Metadata and Body
         metadata, body = parse_metadata_and_body(file_content)

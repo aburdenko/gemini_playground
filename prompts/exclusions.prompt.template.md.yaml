@@ -1,0 +1,16 @@
+variables:
+  claim_type: "340B"
+  pharm_type: "Rebate"
+  
+  
+  # contract_chunks:
+  #   - chunk_number: 1
+  #     source: "ABC Enterprise - Master (01-01-24).pdf"
+  #     page: 56
+  #     content: |
+  #       The following Claims will be excluded from all pricing and Rebate guarantees:
+  #       - 340B Claims
+  #       - Compound and bulk chemical drug Claims
+
+
+  

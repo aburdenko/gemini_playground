@@ -70,13 +70,26 @@ class PromptManager:
 
         full_config_path = self.template_dir / use_case_config_path
         config_content = self._read_file(full_config_path)
-        config = yaml.safe_load(config_content)
+        config = yaml.safe_load(config_content) or {} # Handle empty YAML files
 
         template_name = config.get("template")
         if not template_name:
-            raise ValueError(f"Config file '{use_case_config_path}' is missing 'template' key.")
+            # Convention: if 'template' key is missing, derive template name
+            # by removing the .yaml/.yml extension from the config file path.
+            # e.g., 'prompts/my_template.md.yaml' -> 'prompts/my_template.md'
+            template_name, ext = os.path.splitext(use_case_config_path)
+            if ext.lower() not in ['.yaml', '.yml']:
+                raise ValueError(f"Config file '{use_case_config_path}' is not a .yaml or .yml file, and is missing the 'template' key.")
 
-        variables = config.get("variables", {})
+            # Verify the conventionally-derived template file exists
+            if not (self.template_dir / template_name).is_file():
+                raise FileNotFoundError(
+                    f"Config file '{use_case_config_path}' is missing the 'template' key, "
+                    f"and the conventionally-derived template file '{template_name}' was not found in '{self.template_dir}'."
+                )
+
+        # The 'variables' key is optional in the YAML file. Handle None if key exists but is null.
+        variables = config.get("variables", {}) or {}
         if dynamic_data:
             variables.update(dynamic_data)
 
@@ -89,3 +102,49 @@ class PromptManager:
                 variables[key] = json.dumps(value, indent=2)
 
         return self.generate_prompt(template_name, variables)
+
+    def generate_prompt_from_template_with_companion_yaml(self, template_name: str, dynamic_data: Optional[Dict[str, Any]] = None) -> str:
+        """
+        Generates a prompt from a template file. It checks for a companion YAML
+        file by convention (e.g., 'template.md' -> 'template.md.yaml') and uses
+        it for variables if it exists.
+
+        Args:
+            template_name: The name of the template file relative to the template_dir.
+            dynamic_data: A dictionary of data to merge with variables from the
+                          companion YAML file. This data will overwrite YAML
+                          variables if keys conflict.
+
+        Returns:
+            The final, formatted prompt as a string. If no companion YAML is
+            found, the template is formatted only with dynamic_data (if provided).
+        """
+        template_full_path = self.template_dir / template_name
+        template_content = self._read_file(template_full_path)
+
+        companion_yaml_path = template_full_path.with_suffix(template_full_path.suffix + '.yaml')
+
+        variables = {}
+        if companion_yaml_path.is_file():
+            try:
+                import yaml
+            except ImportError:
+                raise ImportError("PyYAML is required for this feature. Please install it using 'pip install PyYAML'.")
+
+            yaml_content = self._read_file(companion_yaml_path)
+            yaml_vars = yaml.safe_load(yaml_content) or {}
+            variables.update(yaml_vars)
+
+        if dynamic_data:
+            variables.update(dynamic_data)
+
+        if not variables:
+            return template_content
+
+        # Automatically stringify complex variables
+        import json
+        for key, value in variables.items():
+            if isinstance(value, (dict, list)):
+                variables[key] = json.dumps(value, indent=2)
+
+        return template_content.format(**variables)
