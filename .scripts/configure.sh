@@ -271,7 +271,7 @@ adkweb() {
   # Determine the absolute path to the project root directory, which is one level
   # up from the directory containing this script.
   local script_dir=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
-  local project_root=$(dirname "$script_dir")/..
+  local project_root=$(dirname "$script_dir")
 
   # Use an absolute path to the activate script to ensure it works regardless of
   # the current working directory.
@@ -279,8 +279,8 @@ adkweb() {
   # We must explicitly pass the environment variables to the new bash shell.
   # We also set PYTHONPATH to the project root so that Python can find the 'agents' module.
   PROJECT_ID="$PROJECT_ID" REGION="$REGION" GOOGLE_APPLICATION_CREDENTIALS="$GOOGLE_APPLICATION_CREDENTIALS" \
-  PYTHONPATH="$project_root" \
-  bash -c ". '$project_root/.venv/python3.12/bin/activate' && adk web --port 8001 '$project_root/agents'"
+  PYTHONPATH="$project_root":"$project_root/agents":$PYTHONPATH \
+  bash -c "cd '$project_root/agents/rag-agent' && make install && cd '$project_root' && . '$project_root/.venv/python3.12/bin/activate' && uv run adk web '$project_root/agents' --port 8001 --reload_agents"
 }
 
-export PATH=$PATH:.scripts
+export PATH=$PATH:$HOME/.local/bin:.scripts
