@@ -1,0 +1,155 @@
+{
+  "eval_set_id": "evalset69ecbb",
+  "name": "evalset69ecbb",
+  "eval_cases": [
+    {
+      "eval_id": "case5dec51",
+      "conversation": [
+        {
+          "invocation_id": "e-edaa8133-d035-499b-a4c2-fe17452ce1a0",
+          "user_content": {
+            "parts": [
+              {
+                "text": "What do you know about Alice?"
+              }
+            ],
+            "role": "user"
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "Alice is a character who experiences various adventures, which are later revealed to be a dream. She interacts with figures such as the White Rabbit, the King, the Queen, and a Fawn. During her experiences, she questions her identity, grows large, and can be both outspoken, as when she tells the Queen she is \"nothing but a pack of cards,\" and timid. She also upsets a jury-box and cries a large pool of tears."
+              }
+            ],
+            "role": "model"
+          },
+          "intermediate_data": {},
+          "creation_timestamp": 1760980942.941731
+        }
+      ],
+      "session_input": {
+        "app_name": "rag-agent",
+        "user_id": "user"
+      },
+      "creation_timestamp": 1760980967.684631
+    },
+    {
+      "eval_id": "case23d89b",
+      "conversation": [
+        {
+          "invocation_id": "e-2e31f50a-59a6-495e-bd23-1de11a72511b",
+          "user_content": {
+            "parts": [
+              {
+                "text": "What do you know about Alice?"
+              }
+            ],
+            "role": "user"
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "Alice is a character who experiences various unusual adventures, often questioning her identity during her journey. She interacts with characters such as the White Rabbit, the King, and the Queen. During a trial, she accidentally tips over the jury-box and later argues with the Queen. She also finds herself in a wood where things have no names and meets a Fawn. At one point, she cries so much that she creates a large pool of tears. Many of her experiences turn out to be part of a \"curious dream\" from which she awakens to her sister."
+              }
+            ],
+            "role": "model"
+          },
+          "intermediate_data": {},
+          "creation_timestamp": 1760988898.652009
+        },
+        {
+          "invocation_id": "e-80ed07bd-f6e0-4079-a3d1-e4a8b9304a1e",
+          "user_content": {
+            "parts": [
+              {
+                "text": "How did Alice get to Wonderland?"
+              }
+            ],
+            "role": "user"
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "Alice entered Wonderland by following a White Rabbit with pink eyes down a large rabbit-hole. She was curious after seeing the Rabbit take a watch out of its waistcoat-pocket and hurried after it."
+              }
+            ],
+            "role": "model"
+          },
+          "intermediate_data": {},
+          "creation_timestamp": 1760989097.572237
+        }
+      ],
+      "session_input": {
+        "app_name": "rag-agent",
+        "user_id": "user"
+      },
+      "creation_timestamp": 1760989129.992533
+    },
+    {
+      "eval_id": "case618ef4",
+      "conversation": [
+        {
+          "invocation_id": "e-191a9ea2-3a3b-4bc3-95b8-098f7129c163",
+          "user_content": {
+            "parts": [
+              {
+                "text": "Where did Alice go?"
+              }
+            ],
+            "role": "user"
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "Alice went into an open field, a wood, and was in a hall and a pool of tears. She also looked through into a garden and made a survey of the country she was going to travel through."
+              }
+            ],
+            "role": "model"
+          },
+          "intermediate_data": {},
+          "creation_timestamp": 1761054353.04352
+        },
+        {
+          "invocation_id": "e-68bfdcb0-e0ff-41e6-beac-c85d01102a5e",
+          "user_content": {
+            "parts": [
+              {
+                "text": "Why did she fall?"
+              }
+            ],
+            "role": "user"
+          },
+          "intermediate_data": {},
+          "creation_timestamp": 1761054365.772978
+        },
+        {
+          "invocation_id": "e-4aaa8f3a-dc40-4f3e-9f7b-85317f86efde",
+          "user_content": {
+            "parts": [
+              {
+                "text": "Why did she fall?"
+              }
+            ],
+            "role": "user"
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "Alice fell down the rabbit-hole after something, and the rabbit-hole dipped so suddenly that she had no time to stop herself. She then found herself falling down a very deep well."
+              }
+            ],
+            "role": "model"
+          },
+          "intermediate_data": {},
+          "creation_timestamp": 1761054398.026017
+        }
+      ],
+      "session_input": {
+        "app_name": "rag-agent",
+        "user_id": "user"
+      },
+      "creation_timestamp": 1761054431.651297
+    }
+  ],
+  "creation_timestamp": 1760980963.5774536
+}

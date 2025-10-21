@@ -1,0 +1,8 @@
+[
+  {
+    "input": {
+      "query": "How did Alice get to Wonderland"
+      "Ground Truth": "She fell down a rabbit hole"
+    }
+  }
+]

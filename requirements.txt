@@ -1,8 +1,8 @@
 
-google-generativeai<=1.40.0
-google-cloud-aiplatform[rag]>=1.55.0
+google-cloud-aiplatform
 google-cloud-storage
 google-cloud-logging
+google-adk[eval]
 requests
 gcsfs
 pypdf
@@ -13,6 +13,3 @@ scikit-learn
 fsspec
 tabulate
 PyYAML
-google-adk
-google.adk.integrations
-agent-starter-pack

@@ -197,13 +197,22 @@ echo "Activating environment './venv/python3.12'..."
 # virtual environment has been created.
 echo "Ensuring dependencies from requirements.txt are installed..."
  # Use the full path to the venv pip to ensure we're installing in the correct environment.
-./.venv/python3.12/bin/pip install --quiet -r requirements.txt &> /dev/null
+ # We use --quiet to reduce noise, but we do not redirect stderr to /dev/null.
+ # This ensures that if pip encounters an error (e.g., a missing package), the error will be displayed.
+if ! ./.venv/python3.12/bin/pip install --quiet --no-cache-dir -r requirements.txt; then
+  echo "ERROR: Failed to install dependencies from requirements.txt. Please check the file for errors." >&2
+fi
 
 # --- Google Agent Development Kit Check ---
 # This ensures the necessary libraries for agent development (including RAG and LangChain support) are installed.
 AGENT_PKG_INSTALL="google-cloud-aiplatform[rag,langchain]"
 AGENT_PKG_CHECK="google-cloud-aiplatform" # pip show works on the base package name
 
+# Explicitly install the ADK package if it's not already present.
+if ! ./.venv/python3.12/bin/pip show "$AGENT_PKG_CHECK" &> /dev/null; then
+  echo "Google Agent Development Kit not found. Installing..."
+  ./.venv/python3.12/bin/pip install --quiet "$AGENT_PKG_INSTALL"
+fi
 # This POSIX-compliant check ensures the script is sourced, not executed.
 # (return 0 2>/dev/null) will succeed if sourced and fail if executed.
 if ! (return 0 2>/dev/null); then
@@ -279,8 +288,8 @@ adkweb() {
   # We must explicitly pass the environment variables to the new bash shell.
   # We also set PYTHONPATH to the project root so that Python can find the 'agents' module.
   PROJECT_ID="$PROJECT_ID" REGION="$REGION" GOOGLE_APPLICATION_CREDENTIALS="$GOOGLE_APPLICATION_CREDENTIALS" \
-  PYTHONPATH="$project_root":"$project_root/agents":$PYTHONPATH \
-  bash -c "cd '$project_root/agents/rag-agent' && make install && cd '$project_root' && . '$project_root/.venv/python3.12/bin/activate' && uv run adk web '$project_root/agents' --port 8001 --reload_agents"
+  PYTHONPATH="$project_root":"$project_root/agents":"$project_root/.venv/python3.12/lib/python3.12/site-packages":$PYTHONPATH \
+  bash -c "cd '$project_root/agents/rag-agent' && make install && cd '$project_root' && . '$project_root/.venv/python3.12/bin/activate' && uv run --with-requirements requirements.txt adk web '$project_root/agents' --port 8001 --reload_agents"
 }
 
 export PATH=$PATH:$HOME/.local/bin:.scripts

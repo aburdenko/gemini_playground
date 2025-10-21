@@ -1,0 +1,59 @@
+{
+  "eval_set_id": "evalsetc27941",
+  "name": "evalsetc27941",
+  "eval_cases": [
+    {
+      "eval_id": "case34d4a6",
+      "conversation": [
+        {
+          "invocation_id": "e-7e3f7eda-b457-4c29-bd20-706ec5a76e21",
+          "user_content": {
+            "parts": [
+              {
+                "text": "What happened to Alice?"
+              }
+            ],
+            "role": "user"
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "Alice cried so much that she created a large pool of tears. After encountering the White Rabbit, who dropped his gloves and fan, she picked them up and began to wonder about her changing size and identity. She then found herself, having shrunk, swimming in the very pool of tears she had wept when she was nine feet tall, where she met a mouse. Later, she drank from a bottle, which caused her to grow so large that her head hit the ceiling and she became stuck in the room, with one arm out the window and a foot up the chimney. She pondered her strange circumstances and how she wished she hadn't come down the rabbit-hole. The White Rabbit then came back looking for \"Mary Ann\" and tried to open the door, but Alice was blocking it with her elbow."
+              }
+            ],
+            "role": "model"
+          },
+          "intermediate_data": {},
+          "creation_timestamp": 1760990180.813198
+        },
+        {
+          "invocation_id": "e-53796101-08e7-4d25-a822-4d11876b7c62",
+          "user_content": {
+            "parts": [
+              {
+                "text": "Where did she fall?"
+              }
+            ],
+            "role": "user"
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "Alice fell down a rabbit-hole, which then dipped suddenly into a very deep well. The fall concluded when she landed on a heap of sticks and dry leaves."
+              }
+            ],
+            "role": "model"
+          },
+          "intermediate_data": {},
+          "creation_timestamp": 1760990192.430935
+        }
+      ],
+      "session_input": {
+        "app_name": "rag-agent",
+        "user_id": "user"
+      },
+      "creation_timestamp": 1760990206.7930002
+    }
+  ],
+  "creation_timestamp": 1760990203.2687175
+}
