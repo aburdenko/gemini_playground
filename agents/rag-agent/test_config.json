@@ -1,0 +1,17 @@
+{
+  "metrics": [
+    {
+      "name": "ResponseSummarizationQuality",
+      "evaluator_type": "builtin"
+    },
+    {
+      "name": "ToolUsageQuality",
+      "evaluator_type": "builtin"
+    },
+    {
+      "name": "Groundedness",
+      "evaluator_type": "custom",
+      "evaluator_path": "app.evaluators.Groundedness"
+    }
+  ]
+}

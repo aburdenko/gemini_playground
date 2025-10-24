@@ -18,6 +18,8 @@ import os
 import google
 import vertexai
 from google.adk.agents import Agent
+from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
+from opentelemetry.sdk.trace import TracerProvider, export
 from google.adk.tools.retrieval.vertex_ai_rag_retrieval import VertexAiRagRetrieval
 from vertexai.preview import rag
 

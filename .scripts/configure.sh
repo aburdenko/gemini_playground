@@ -205,7 +205,7 @@ fi
 
 # --- Google Agent Development Kit Check ---
 # This ensures the necessary libraries for agent development (including RAG and LangChain support) are installed.
-AGENT_PKG_INSTALL="google-cloud-aiplatform[rag,langchain]"
+AGENT_PKG_INSTALL="google-cloud-aiplatform[rag,eval]"
 AGENT_PKG_CHECK="google-cloud-aiplatform" # pip show works on the base package name
 
 # Explicitly install the ADK package if it's not already present.
@@ -263,16 +263,21 @@ adkweb() {
   echo
 
   echo "Stopping any existing ADK web server..."
-  local pid=$(lsof -t -i :8001)
-  if [ -n "$pid" ]; then
-    echo "Attempting graceful shutdown of process $pid on port 8001..."
-    kill "$pid" # Send SIGTERM to allow graceful shutdown
-    sleep 2   # Wait for the process to terminate
-    if ps -p "$pid" > /dev/null; then
-      echo "Process $pid did not terminate gracefully, forcing shutdown..."
-      kill -9 "$pid" # Force kill if it's still running
+  local pids=$(lsof -t -i :8001) # Get all PIDs
+  if [ -n "$pids" ]; then
+    echo "Attempting graceful shutdown of processes $pids on port 8001..."
+    for pid in $pids; do # Iterate over each PID
+      kill "$pid" # Send SIGTERM
       sleep 1
-    fi
+    done
+    sleep 2 # Give time for graceful shutdown
+    for pid in $pids; do # Check if any are still running
+      if ps -p "$pid" > /dev/null; then
+        echo "Process $pid did not terminate gracefully, forcing shutdown..."
+        kill -9 "$pid" # Force kill
+        sleep 1
+      fi
+    done
   else
     echo "No process found listening on port 8001."
   fi
@@ -286,10 +291,11 @@ adkweb() {
   # the current working directory.
   # Run the server in the foreground for easier debugging and control.
   # We must explicitly pass the environment variables to the new bash shell.
-  # We also set PYTHONPATH to the project root so that Python can find the 'agents' module.
-  PROJECT_ID="$PROJECT_ID" REGION="$REGION" GOOGLE_APPLICATION_CREDENTIALS="$GOOGLE_APPLICATION_CREDENTIALS" \
-  PYTHONPATH="$project_root":"$project_root/agents":"$project_root/.venv/python3.12/lib/python3.12/site-packages":$PYTHONPATH \
-  bash -c "cd '$project_root/agents/rag-agent' && make install && cd '$project_root' && . '$project_root/.venv/python3.12/bin/activate' && uv run --with-requirements requirements.txt adk web '$project_root/agents' --port 8001 --reload_agents"
+  # We run our custom logging script directly. The script is configured to start a uvicorn
+  # server that loads the ADK app and injects our logging middleware. This approach
+  # bypasses the `adk web` command, avoiding issues with older ADK versions that
+  # lack the --bootstrap flag, and prevents the server from hanging.
+  "$(dirname "$script_dir")/.venv/python3.12/bin/python3" "$(dirname "$script_dir")/.scripts/run_adk_web_with_logging.py"
 }
 
 export PATH=$PATH:$HOME/.local/bin:.scripts

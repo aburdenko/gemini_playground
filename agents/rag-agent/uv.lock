@@ -2170,74 +2170,6 @@ wheels = [
 ]
 
 [[package]]
-name = "rag-agent"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "google-adk" },
-    { name = "google-cloud-aiplatform", extra = ["agent-engines", "evaluation"] },
-    { name = "google-cloud-logging" },
-    { name = "jinja2" },
-    { name = "langchain" },
-    { name = "langchain-community" },
-    { name = "langchain-core" },
-    { name = "langchain-google-community", extra = ["vertexaisearch"] },
-    { name = "langchain-google-vertexai" },
-    { name = "langchain-openai" },
-    { name = "opentelemetry-exporter-gcp-trace" },
-    { name = "protobuf" },
-]
-
-[package.optional-dependencies]
-jupyter = [
-    { name = "jupyter" },
-]
-lint = [
-    { name = "codespell" },
-    { name = "mypy" },
-    { name = "ruff" },
-    { name = "types-pyyaml" },
-    { name = "types-requests" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "nest-asyncio" },
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "codespell", marker = "extra == 'lint'", specifier = ">=2.2.0,<3.0.0" },
-    { name = "google-adk", specifier = ">=1.15.0,<2.0.0" },
-    { name = "google-cloud-aiplatform", extras = ["evaluation", "agent-engines"], specifier = ">=1.118.0,<2.0.0" },
-    { name = "google-cloud-logging", specifier = ">=3.12.0,<4.0.0" },
-    { name = "jinja2", specifier = "~=3.1.6" },
-    { name = "jupyter", marker = "extra == 'jupyter'", specifier = ">=1.0.0,<2.0.0" },
-    { name = "langchain", specifier = "~=0.3.24" },
-    { name = "langchain-community", specifier = "~=0.3.17" },
-    { name = "langchain-core", specifier = "~=0.3.55" },
-    { name = "langchain-google-community", extras = ["vertexaisearch"], specifier = "~=2.0.7" },
-    { name = "langchain-google-vertexai", specifier = "~=2.0.7" },
-    { name = "langchain-openai", specifier = "~=0.3.5" },
-    { name = "mypy", marker = "extra == 'lint'", specifier = ">=1.15.0,<2.0.0" },
-    { name = "opentelemetry-exporter-gcp-trace", specifier = ">=1.9.0,<2.0.0" },
-    { name = "protobuf", specifier = ">=6.31.1,<7.0.0" },
-    { name = "ruff", marker = "extra == 'lint'", specifier = ">=0.4.6,<1.0.0" },
-    { name = "types-pyyaml", marker = "extra == 'lint'", specifier = ">=6.0.12.20240917,<7.0.0" },
-    { name = "types-requests", marker = "extra == 'lint'", specifier = ">=2.32.0.20240914,<3.0.0" },
-]
-provides-extras = ["jupyter", "lint"]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "nest-asyncio", specifier = ">=1.6.0,<2.0.0" },
-    { name = "pytest", specifier = ">=8.3.4,<9.0.0" },
-    { name = "pytest-asyncio", specifier = ">=0.23.8,<1.0.0" },
-]
-
-[[package]]
 name = "mako"
 version = "1.3.10"
 source = { registry = "https://pypi.org/simple" }
@@ -3501,6 +3433,76 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/49/0e/3f0d0d335c6b3abb9b7b723776d0b21fa7f3a6c819a0db6097059aada160/pyzmq-27.1.0-pp311-pypy311_pp73-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:53b40f8ae006f2734ee7608d59ed661419f087521edbfc2149c3932e9c14808c", size = 567747, upload-time = "2025-09-08T23:09:52.698Z" },
     { url = "https://files.pythonhosted.org/packages/a1/cf/f2b3784d536250ffd4be70e049f3b60981235d70c6e8ce7e3ef21e1adb25/pyzmq-27.1.0-pp311-pypy311_pp73-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:f605d884e7c8be8fe1aa94e0a783bf3f591b84c24e4bc4f3e7564c82ac25e271", size = 747371, upload-time = "2025-09-08T23:09:54.563Z" },
     { url = "https://files.pythonhosted.org/packages/01/1b/5dbe84eefc86f48473947e2f41711aded97eecef1231f4558f1f02713c12/pyzmq-27.1.0-pp311-pypy311_pp73-win_amd64.whl", hash = "sha256:c9f7f6e13dff2e44a6afeaf2cf54cee5929ad64afaf4d40b50f93c58fc687355", size = 544862, upload-time = "2025-09-08T23:09:56.509Z" },
+]
+
+[[package]]
+name = "rag-agent"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "google-adk" },
+    { name = "google-cloud-aiplatform", extra = ["agent-engines", "evaluation"] },
+    { name = "google-cloud-logging" },
+    { name = "jinja2" },
+    { name = "langchain" },
+    { name = "langchain-community" },
+    { name = "langchain-core" },
+    { name = "langchain-google-community", extra = ["vertexaisearch"] },
+    { name = "langchain-google-vertexai" },
+    { name = "langchain-openai" },
+    { name = "opentelemetry-exporter-gcp-trace" },
+    { name = "opentelemetry-sdk" },
+    { name = "protobuf" },
+]
+
+[package.optional-dependencies]
+jupyter = [
+    { name = "jupyter" },
+]
+lint = [
+    { name = "codespell" },
+    { name = "mypy" },
+    { name = "ruff" },
+    { name = "types-pyyaml" },
+    { name = "types-requests" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "nest-asyncio" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "codespell", marker = "extra == 'lint'", specifier = ">=2.2.0,<3.0.0" },
+    { name = "google-adk", specifier = ">=1.15.0,<2.0.0" },
+    { name = "google-cloud-aiplatform", extras = ["evaluation", "agent-engines"], specifier = ">=1.118.0,<2.0.0" },
+    { name = "google-cloud-logging", specifier = ">=3.12.0,<4.0.0" },
+    { name = "jinja2", specifier = "~=3.1.6" },
+    { name = "jupyter", marker = "extra == 'jupyter'", specifier = ">=1.0.0,<2.0.0" },
+    { name = "langchain", specifier = "~=0.3.24" },
+    { name = "langchain-community", specifier = "~=0.3.17" },
+    { name = "langchain-core", specifier = "~=0.3.55" },
+    { name = "langchain-google-community", extras = ["vertexaisearch"], specifier = "~=2.0.7" },
+    { name = "langchain-google-vertexai", specifier = "~=2.0.7" },
+    { name = "langchain-openai", specifier = "~=0.3.5" },
+    { name = "mypy", marker = "extra == 'lint'", specifier = ">=1.15.0,<2.0.0" },
+    { name = "opentelemetry-exporter-gcp-trace", specifier = ">=1.9.0,<2.0.0" },
+    { name = "opentelemetry-sdk", specifier = "==1.37.0" },
+    { name = "protobuf", specifier = ">=6.31.1,<7.0.0" },
+    { name = "ruff", marker = "extra == 'lint'", specifier = ">=0.4.6,<1.0.0" },
+    { name = "types-pyyaml", marker = "extra == 'lint'", specifier = ">=6.0.12.20240917,<7.0.0" },
+    { name = "types-requests", marker = "extra == 'lint'", specifier = ">=2.32.0.20240914,<3.0.0" },
+]
+provides-extras = ["jupyter", "lint"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "nest-asyncio", specifier = ">=1.6.0,<2.0.0" },
+    { name = "pytest", specifier = ">=8.3.4,<9.0.0" },
+    { name = "pytest-asyncio", specifier = ">=0.23.8,<1.0.0" },
 ]
 
 [[package]]

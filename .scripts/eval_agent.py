@@ -17,10 +17,12 @@ import os
 from urllib.parse import urlparse
 import re
 
+import hashlib
 from google.cloud import aiplatform_v1
 import json
 import io
 import base64
+import argparse
 
 PROJECT_ID = os.environ.get("PROJECT_ID", "your-gcp-project-id")
 LOCATION = os.environ.get("REGION", "us-central1")
@@ -57,7 +59,15 @@ def get_logs_for_evaluation(last_run_timestamp: str | None) -> tuple[pd.DataFram
     agent_sessions = {}
     simple_logs = []
     for entry in logging_client.list_entries(filter_=log_filter):
-        payload = entry.json_payload if hasattr(entry, 'json_payload') else {}
+        payload = {} # Initialize payload as empty dict
+        if hasattr(entry, 'json_payload'):
+            payload = entry.json_payload
+        elif hasattr(entry, 'text_payload'):
+            # For text payloads, we can put the text into a 'message' field
+            payload = {"message": entry.text_payload}
+        else:
+            # Fallback for other types of payloads
+            payload = {"message": "Unsupported log entry type"}
         if "session_id" in payload:
             session_id = payload.get("session_id")
             if session_id not in agent_sessions:
@@ -92,6 +102,94 @@ def get_logs_for_evaluation(last_run_timestamp: str | None) -> tuple[pd.DataFram
         simple_df = pd.DataFrame(simple_logs)
     return agent_df, simple_df
 
+def export_sessions_to_evalset(last_run_timestamp: str | None):
+    """
+    Fetches agent logs and exports each session to a separate .evalset.json file.
+    """
+    print("Fetching logs from Cloud Logging to export as eval sets...")
+    logging_client = logging.Client(project=PROJECT_ID)
+    # Broaden filter to get both agent sessions (with session_id) and simple ADK web logs (with prompt).
+    # Broaden filter to get both agent sessions (with session_id) and simple ADK web logs (with prompt).
+    base_filter = f'logName="{LOG_NAME}" AND (jsonPayload.session_id:* OR jsonPayload.prompt:*)'
+    if last_run_timestamp:
+        log_filter = f'{base_filter} AND timestamp >= "{last_run_timestamp}"'
+    else:
+        log_filter = base_filter
+
+    # 1. Group logs by session_id and collect simple logs
+    sessions = {}
+    simple_logs = []
+    for entry in logging_client.list_entries(filter_=log_filter):
+        payload = {} # Initialize payload as empty dict
+        if isinstance(entry.payload, dict):
+            payload = entry.payload
+        elif isinstance(entry.payload, str):
+            # For text payloads, we can put the text into a 'message' field
+            payload = {"message": entry.payload}
+        else:
+            # Fallback for other types of payloads
+            payload = {"message": "Unsupported log entry type"}
+        if "session_id" in payload:
+            session_id = payload.get("session_id")
+            if session_id not in sessions:
+                sessions[session_id] = []
+            sessions[session_id].append(payload)
+        elif "prompt" in payload and "session_id" not in payload:
+            # This is likely a simple log from ADK Web
+            simple_logs.append(payload)
+
+    if not sessions and not simple_logs:
+        print("No new logs found to export.")
+        return
+
+    output_dir = os.path.join(os.path.dirname(__file__), '..', 'agents', 'rag-agent', 'eval_sets')
+    os.makedirs(output_dir, exist_ok=True)
+    print(f"Found {len(sessions)} agent session(s) and {len(simple_logs)} simple log(s). Exporting to: {output_dir}")
+
+    # 2. Process and write each agent session to a file
+    for session_id, logs in sessions.items():
+        conversation_turns = []
+        # Sort logs by step to reconstruct the conversation order
+        sorted_logs = sorted(logs, key=lambda x: x.get("step", 0))
+        
+        for log in sorted_logs:
+            if log.get("log_type") == "final_answer":
+                # Find the corresponding prompt for this answer
+                prompt = ""
+                for prev_log in reversed(sorted_logs[:log.get("step")]):
+                    if "initial_prompt" in prev_log: # This will be the first prompt
+                        prompt = prev_log.get("initial_prompt")
+                        break
+
+                conversation_turns.append({
+                    "user_content": {"parts": [{"text": prompt}]},
+                    "final_response": {"parts": [{"text": log.get("final_answer", "")}]}
+                })
+
+        eval_set = {"eval_set_id": session_id, "eval_cases": [{"eval_id": f"case-{session_id}", "conversation": conversation_turns}]}
+        output_filename = os.path.join(output_dir, f"rag-agent.evalset.{session_id}.json")
+        with open(output_filename, 'w') as f:
+            json.dump(eval_set, f, indent=2)
+        print(f"  - Successfully exported session {session_id} to {output_filename}")
+
+    # 3. Process and write each simple log to a file
+    for i, log in enumerate(simple_logs):
+        # Generate a unique ID for this simple log based on its content and timestamp
+        prompt_hash = hashlib.sha256(log.get("prompt", "").encode()).hexdigest()[:8]
+        eval_set_id = f"adk-web-{datetime.now().strftime('%Y%m%d%H%M%S')}-{prompt_hash}"
+
+        conversation_turns = [{
+            "user_content": {"parts": [{"text": log.get("prompt", "")}]},
+            # The response is a placeholder in the log, so we reflect that.
+            "final_response": {"parts": [{"text": log.get("response", "")}]}
+        }]
+
+        eval_set = {"eval_set_id": eval_set_id, "eval_cases": [{"eval_id": f"case-{eval_set_id}", "conversation": conversation_turns}]}
+        output_filename = os.path.join(output_dir, f"rag-agent.evalset.{eval_set_id}.json")
+        with open(output_filename, 'w') as f:
+            json.dump(eval_set, f, indent=2)
+        print(f"  - Successfully exported ADK web log to {output_filename}")
+
 def generate_radar_chart(summary_metrics: dict, run_name_suffix: str) -> str:
     """Generates a radar chart from summary metrics and returns it as a base64 PNG."""
     labels = [key for key in summary_metrics.keys() if "/mean" in key]
@@ -125,7 +223,13 @@ def generate_metrics_csv(metrics_df: pd.DataFrame) -> str:
     """Generates a CSV string from a metrics DataFrame."""
     return metrics_df.to_csv(index=False)
 
-def run_evaluation_and_generate_artifacts(all_time=False):
+def run_evaluation_and_generate_artifacts(all_time: bool = False):
+    """
+    Runs the main evaluation flow.
+    
+    Args:
+        all_time: If True, fetches all logs. Otherwise, fetches logs since the last run.
+    """
     current_time_str = datetime.now().strftime('%Y%m%d-%H%M%S')
     experiment_name = EXPERIMENT_NAME
     aiplatform.init(project=PROJECT_ID, location=LOCATION, experiment=experiment_name)
@@ -212,3 +316,27 @@ def _execute_evaluation_run_for_artifacts(
     )
     
     return evaluation_result.summary_metrics, evaluation_result.metrics_table
+
+def main():
+    parser = argparse.ArgumentParser(description="Run evaluation or export agent sessions from logs.")
+    parser.add_argument(
+        "--export-sessions",
+        action="store_true",
+        help="Export agent sessions from logs to .evalset.json files instead of running evaluation."
+    )
+    parser.add_argument(
+        "--all-time",
+        action="store_true",
+        help="Process all logs, ignoring the last run timestamp. Applies to both evaluation and export."
+    )
+    args = parser.parse_args()
+
+    if args.export_sessions:
+        export_sessions_to_evalset(get_last_run_timestamp() if not args.all_time else None)
+        if not args.all_time:
+            save_current_timestamp()
+    else:
+        run_evaluation_and_generate_artifacts(all_time=args.all_time)
+
+if __name__ == "__main__":
+    main()

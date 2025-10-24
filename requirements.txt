@@ -2,6 +2,7 @@
 google-cloud-aiplatform
 google-cloud-storage
 google-cloud-logging
+google-adk
 google-adk[eval]
 requests
 gcsfs
@@ -13,3 +14,4 @@ scikit-learn
 fsspec
 tabulate
 PyYAML
+opentelemetry-exporter-gcp-trace
