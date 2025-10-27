@@ -1,11 +1,8 @@
-from google.adk.evaluate import (
-    Evaluation,
-    Evaluator,
-    Metric,
-    ResponseSummarizationQuality,
-    ToolUsageQuality,
-)
-from google.adk.models import Llm
+from google.adk.evaluation.evaluator import Evaluator
+from google.adk.evaluation.eval_metrics import EvalMetric, EvalMetricResult
+from google.adk.evaluation.response_evaluator import ResponseEvaluator
+from google.adk.evaluation.trajectory_evaluator import TrajectoryEvaluator
+from google.adk.models import Gemini
 from google.adk.agents import Agent
 
 
@@ -15,16 +12,16 @@ class Groundedness(Evaluator):
     provided context. This is crucial for RAG agents.
     """
 
-    def __init__(self, llm: Llm):
+    def __init__(self, llm: Gemini):
         self._llm = llm
 
-    def evaluate(self, agent: Agent, test_case: dict) -> list[Metric]:
+    def evaluate(self, agent: Agent, test_case: dict) -> list[EvalMetricResult]:
         response = test_case.get("output", {}).get("response")
         # For RAG, context is often part of the output
         context = test_case.get("output", {}).get("context")
 
         if not response or not context:
-            return [Metric(name="groundedness", value=0.0, rationale="Missing response or context for evaluation.")]
+            return [EvalMetricResult(name="groundedness", value=0.0, rationale="Missing response or context for evaluation.")]
 
         prompt = f"""
         You are an expert evaluator. Your task is to determine if the 'Response' is factually supported by the 'Context'.
@@ -53,10 +50,45 @@ class Groundedness(Evaluator):
             score = 0.0
             rationale = "Failed to parse evaluation response from LLM."
 
-        return [Metric(name="groundedness", value=score, rationale=rationale)]
+        return [EvalMetricResult(name="groundedness", value=score, rationale=rationale)]
 
 
-def get_evaluators(llm: Llm) -> list[Evaluator]:
+class ContainsWords(Evaluator):
+    """
+    A custom evaluator to check if the agent's response contains specific words.
+    """
+
+    def evaluate(self, agent: Agent, test_case: dict) -> list[EvalMetricResult]:
+        response = test_case.get("response", "")
+        ground_truth = test_case.get("ground_truth", {})
+
+        if ground_truth.get("metric_type") != "contains_words":
+            return [] # Not applicable for this metric type
+
+        if not response:
+            return [EvalMetricResult(name="contains_words", value=0.0, rationale="Missing response for evaluation.")]
+
+        expected_words_str = ground_truth.get("reference", "")
+        if not expected_words_str:
+            return [EvalMetricResult(name="contains_words", value=0.0, rationale="No reference words provided for evaluation.")]
+
+        words_to_check = [word.strip() for word in expected_words_str.split(' ') if word.strip()]
+        contains_all_words = all(word in response for word in words_to_check)
+
+        actual_score = 1.0 if contains_all_words else 0.0
+        expected_score = ground_truth.get("contains_words_expected_value", 0.0)
+
+        if actual_score == expected_score:
+            rationale = f"Correctly identified that the response should {'' if expected_score else 'not '}contain the words: '{expected_words_str}'."
+            score = 1.0
+        else:
+            rationale = f"Incorrectly identified that the response should {'' if expected_score else 'not '}contain the words: '{expected_words_str}'."
+            score = 0.0
+
+        return [EvalMetricResult(name="contains_words", value=score, rationale=rationale)]
+
+
+def get_evaluators(llm: Gemini) -> list[Evaluator]:
     """
     Returns a list of all evaluators to be run for the RAG agent.
     """
@@ -66,4 +98,5 @@ def get_evaluators(llm: Llm) -> list[Evaluator]:
         ToolUsageQuality(llm),
         # Custom RAG-specific evaluator
         Groundedness(llm),
+        ContainsWords(),
     ]

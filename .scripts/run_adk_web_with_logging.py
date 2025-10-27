@@ -42,7 +42,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
                 prompt = request_data.get("newMessage", {}).get("parts", [{}])[0].get("text", "")
                 if prompt:
                     print(f"DEBUG: LoggingMiddleware triggered for prompt: {prompt}")
-                    python_logging.info("ADK Web Log: Middleware triggered for prompt: %s" % prompt, extra={'json_fields': {'prompt': prompt}})
+                    python_logging.info("ADK Web Log: Middleware triggered for prompt: %s" % prompt, extra={'json_fields': {'prompt': prompt, 'session_id': request_data.get('sessionId'), 'user_id': request_data.get('userId'), 'request_id': request_data.get('sessionId'), 'log_type': 'user_message'}})
             except (json.JSONDecodeError, KeyError):
                 # Ignore if body is not JSON or doesn't have the expected structure.
                 print(f"DEBUG: LoggingMiddleware: Failed to parse JSON body or find 'prompt' for path: {request.url.path}")
