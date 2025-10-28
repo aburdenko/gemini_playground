@@ -26,3 +26,4 @@ agents/rag-agent/evalset219e1e.evalset.json
 agents/rag-agent/evalsete04bd4.evalset.json
 agents/rag-agent/uv.lock
 .env
+package-lock.json

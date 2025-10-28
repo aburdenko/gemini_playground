@@ -257,28 +257,46 @@ def export_sessions_to_evalset(last_run_timestamp: str | None):
             json.dump(eval_set, f, indent=2)
         print(f"  - Successfully exported ADK web log to {output_filename}")
 
-def generate_radar_chart(summary_metrics: dict, run_name_suffix: str) -> str:
-    """Generates a radar chart from summary metrics and returns it as a base64 PNG."""
-    labels = [key for key in summary_metrics.keys() if "/mean" in key]
-    scores = [summary_metrics[key] for key in labels]
-    clean_labels = [label.replace('/mean', '') for label in labels]
-
-    if not clean_labels or not scores:
+def generate_radar_chart(all_summary_metrics_data: list[tuple[dict, str]], current_time_str: str) -> str:
+    """Generates a radar chart from multiple sets of summary metrics and returns it as a base64 PNG."""
+    if not all_summary_metrics_data:
         return ""
 
+    # Collect all unique labels (metrics) across all summary_metrics
+    all_labels = set()
+    for summary_metrics, _ in all_summary_metrics_data:
+        for key in summary_metrics.keys():
+            if "/mean" in key:
+                all_labels.add(key.replace('/mean', ''))
+    
+    if not all_labels:
+        return ""
+
+    clean_labels = sorted(list(all_labels))
     num_vars = len(clean_labels)
     angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
-    scores += scores[:1]
-    angles += angles[:1]
+    angles += angles[:1] # Complete the loop
 
-    fig, ax = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True))
-    ax.plot(angles, scores, linewidth=2, linestyle='solid', label=f'Performance ({run_name_suffix.strip("-")})')
-    ax.fill(angles, scores, 'b', alpha=0.1)
+    fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(polar=True))
+
+    for summary_metrics, run_name_suffix in all_summary_metrics_data:
+        scores = []
+        for label in clean_labels:
+            score_key = f"{label}/mean"
+            scores.append(summary_metrics.get(score_key, 0.0)) # Default to 0 if metric not present
+        
+        scores += scores[:1] # Complete the loop
+
+        ax.plot(angles, scores, linewidth=2, linestyle='solid', label=f'Performance ({run_name_suffix})')
+        ax.fill(angles, scores, alpha=0.1)
+
     ax.set_yticklabels([])
+    ax.set_ylim(0, 1) # Ensure radial axis goes from 0 to 1
     ax.set_xticks(angles[:-1])
     ax.set_xticklabels(clean_labels)
-    ax.set_title(f'Evaluation of Gemini Run ({run_name_suffix.strip("-")})', size=12, color='black', va='center')
+    ax.set_title(f'Evaluation of Gemini Runs ({current_time_str})', size=12, color='black', va='bottom')
     ax.grid(True)
+    ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1))
 
     pic_io = io.BytesIO()
     plt.savefig(pic_io, format='png', bbox_inches='tight', dpi=150)
@@ -312,6 +330,9 @@ def run_evaluation_and_generate_artifacts(eval_df: pd.DataFrame | None = None, a
         agent_df, simple_df = get_logs_for_evaluation(last_run)
     
     artifacts = []
+    all_metrics_dfs = []
+    all_summary_metrics_data = []
+    final_combined_df = None
 
     if agent_df is not None and not agent_df.empty:
         # Initialize GCS client
@@ -375,52 +396,63 @@ def run_evaluation_and_generate_artifacts(eval_df: pd.DataFrame | None = None, a
             # No need to re-add it here.
 
             if summary_metrics:
-                radar_chart_base64 = generate_radar_chart(summary_metrics, f"-{metric_type}")
-                if radar_chart_base64:
-                    radar_chart_filename = f"radar_chart_{session_id or 'unknown_session'}_{metric_type}_{current_time_str}.png"
-                    blob = bucket.blob(f"evaluation_artifacts/{session_id or 'unknown_session'}/{radar_chart_filename}")
-                    blob.upload_from_string(base64.b64decode(radar_chart_base64), content_type="image/png")
-                    gcs_uri = f"gs://{bucket.name}/{blob.name}"
-                    artifacts.append({
-                        'id': f'{metric_type}_radar_chart',
-                        'versionId': current_time_str,
-                        'mimeType': 'image/png',
-                        'gcsUrl': gcs_uri,
-                        'data': 'data:image/png;base64,' + radar_chart_base64
-                    })
-                    # experiment_run.log_params({f'{metric_type}_radar_chart_gcs_uri': gcs_uri})
-                    print(f"Radar chart for {metric_type} uploaded to: {gcs_uri}")
-
-                    eval_sets_dir = os.path.join(os.path.dirname(__file__), '..', 'agents', 'rag-agent', 'eval_sets')
-                    local_radar_chart_path = os.path.join(eval_sets_dir, radar_chart_filename)
-                    blob.download_to_filename(local_radar_chart_path)
-                    print(f"Radar chart for {metric_type} downloaded to: {local_radar_chart_path}")
+                all_summary_metrics_data.append((summary_metrics, metric_type))
 
             if metrics_df is not None and 'session_id' in metrics_df.columns:
-                for session_id_group, session_metrics_df in metrics_df.groupby('session_id'):
-                    metrics_csv_content = generate_metrics_csv(session_metrics_df)
-                    if metrics_csv_content:
-                        metrics_csv_filename = f"metrics_{session_id_group}_{metric_type}_{current_time_str}.csv"
-                        blob = bucket.blob(f"evaluation_artifacts/{session_id_group}/{metrics_csv_filename}")
-                        blob.upload_from_string(metrics_csv_content, content_type="text/csv")
-                        gcs_uri = f"gs://{bucket.name}/{blob.name}"
-                        artifacts.append({
-                            'id': f'{metric_type}_metrics_csv_{session_id_group}',
-                            'versionId': current_time_str,
-                            'mimeType': 'text/csv',
-                            'gcsUrl': gcs_uri,
-                            'data': 'data:text/csv;base64,' + base64.b64encode(metrics_csv_content.encode('utf-8')).decode('utf-8')
-                        })
-                        # experiment_run.log_params({f'{metric_type}_metrics_csv_gcs_uri_{session_id_group}': gcs_uri})
-                        print(f"Metrics CSV for session {session_id_group} and {metric_type} uploaded to: {gcs_uri}")
-
-                        eval_sets_dir = os.path.join(os.path.dirname(__file__), '..', 'agents', 'rag-agent', 'eval_sets')
-                        local_metrics_csv_path = os.path.join(eval_sets_dir, metrics_csv_filename)
-                        blob.download_to_filename(local_metrics_csv_path)
-                        print(f"Metrics CSV for session {session_id_group} and {metric_type} downloaded to: {local_metrics_csv_path}")
+                # Add a 'metric_type' column to distinguish metrics when concatenating
+                metrics_df['metric_type'] = metric_type
+                all_metrics_dfs.append(metrics_df)
             elif metrics_df is not None:
-                print("Metrics DataFrame generated, but 'session_id' column not found. Skipping artifact upload for metrics CSV.")
+                print(f"Metrics DataFrame generated for {metric_type}, but 'session_id' column not found. Skipping for combined CSV.")
 
+
+        if all_metrics_dfs:
+            # Create a list to hold processed dataframes for merging
+            processed_dfs = []
+            for df in all_metrics_dfs:
+                if df.empty or 'metric_type' not in df.columns:
+                    continue
+                # Identify the metric value column(s) in the current df
+                current_metric_type = df['metric_type'].iloc[0]
+                
+                # Find the actual score column for this metric type
+                score_cols = [col for col in df.columns if col not in ['session_id', 'response', 'reference', 'metric_type', 'prompt', 'conversation', 'ground_truth']]
+                
+                if score_cols:
+                    # Take the first score column as the primary score for this metric type
+                    primary_score_col = score_cols[0]
+                    
+                    # Create a new DataFrame with session_id and the renamed score column
+                    temp_df = df[['session_id', primary_score_col]].copy()
+                    temp_df.rename(columns={primary_score_col: current_metric_type}, inplace=True)
+                    processed_dfs.append(temp_df)
+            
+            if processed_dfs:
+                # Merge all processed DataFrames on 'session_id'
+                final_combined_df = processed_dfs[0]
+                for i in range(1, len(processed_dfs)):
+                    final_combined_df = pd.merge(final_combined_df, processed_dfs[i], on='session_id', how='outer')
+
+        if all_summary_metrics_data:
+            combined_radar_chart_base64 = generate_radar_chart(all_summary_metrics_data, current_time_str)
+            if combined_radar_chart_base64:
+                combined_radar_chart_filename = f"all_metrics_radar_chart_{current_time_str}.png"
+                blob = bucket.blob(f"evaluation_artifacts/combined/{combined_radar_chart_filename}")
+                blob.upload_from_string(base64.b64decode(combined_radar_chart_base64), content_type="image/png")
+                gcs_uri = f"gs://{bucket.name}/{blob.name}"
+                artifacts.append({
+                    'id': 'all_metrics_radar_chart',
+                    'versionId': current_time_str,
+                    'mimeType': 'image/png',
+                    'gcsUrl': gcs_uri,
+                    'data': 'data:image/png;base64,' + combined_radar_chart_base64
+                })
+                print(f"Combined radar chart uploaded to: {gcs_uri}")
+
+                eval_sets_dir = os.path.join(os.path.dirname(__file__), '..', 'agents', 'rag-agent', 'eval_sets')
+                local_combined_radar_chart_path = os.path.join(eval_sets_dir, combined_radar_chart_filename)
+                blob.download_to_filename(local_combined_radar_chart_path)
+                print(f"Combined radar chart downloaded to: {local_combined_radar_chart_path}")
 
         if session_id:
             try:
@@ -457,27 +489,16 @@ def run_evaluation_and_generate_artifacts(eval_df: pd.DataFrame | None = None, a
                     current_time_str=current_time_str
                 )
                 if summary_metrics:
-                    # Note: artifacts is a list, not a dict.
-                    artifacts.append({
-                        'id': 'simple_radar_chart',
-                        'versionId': current_time_str,
-                        'mimeType': 'image/png',
-                        'data': 'data:image/png;base64,' + generate_radar_chart(summary_metrics, "-simple")
-                    })
+                    all_summary_metrics_data.append((summary_metrics, "simple"))
                 if metrics_df is not None:
-                    artifacts.append({
-                        'id': 'simple_metrics_csv',
-                        'versionId': current_time_str,
-                        'mimeType': 'text/csv',
-                        'data': 'data:text/csv;base64,' + base64.b64encode(generate_metrics_csv(metrics_df).encode('utf-8')).decode('utf-8')
-                    })
+                    all_metrics_dfs.append(metrics_df)
             except Exception as e:
                 print(f"Error during simple evaluation: {e}")
 
     if not all_time:
         save_current_timestamp()
     
-    return artifacts
+    return artifacts, final_combined_df
 
 def _execute_evaluation_run_for_artifacts(
     eval_df: pd.DataFrame,
@@ -486,6 +507,7 @@ def _execute_evaluation_run_for_artifacts(
     experiment_name: str,
     current_time_str: str
 ):
+    metric_type = metric_type.strip()
     run_name = f"custom-metric-{current_time_str}" if metric_type == "contains_words" else f"{metric_type}-{current_time_str}"
     full_judgement_model_name = f"projects/{PROJECT_ID}/locations/{LOCATION}/publishers/google/models/{JUDGEMENT_MODEL_NAME}"
     autorater_config = AutoraterConfig(autorater_model=full_judgement_model_name)
@@ -495,6 +517,8 @@ def _execute_evaluation_run_for_artifacts(
         metrics_to_apply = [CustomMetric(name="contains_words", metric_function=_contains_words_metric_function)]
     elif metric_type == "bleu":
         metrics_to_apply = ["bleu"]
+    elif metric_type == "rouge":
+        metrics_to_apply = ["rouge"]
     elif metric_type == "simple": # Handle the 'simple' case
         metrics_to_apply = ["fluency", "coherence", "safety", "rouge", "bleu"]
     else:
@@ -512,10 +536,13 @@ def _execute_evaluation_run_for_artifacts(
     evaluation_result = eval_task.evaluate(
         experiment_run_name=run_name
     )
-    # The evaluate() method creates the experiment run. We can directly use its name.
-    # experiment_run = evaluation_result.experiment_run # Commented out
     
-    return evaluation_result.summary_metrics, evaluation_result.metrics_table, None # Return None for experiment_run
+    # Add metric_type to the metrics_table before returning
+    metrics_table = evaluation_result.metrics_table
+    if metrics_table is not None:
+        metrics_table['metric_type'] = metric_type
+
+    return evaluation_result.summary_metrics, metrics_table, None
 
 def main():
     parser = argparse.ArgumentParser(description="Run evaluation or export agent sessions from logs.")
@@ -534,7 +561,24 @@ def main():
         action="store_true",
         help="Run evaluation using local .evalset.json files instead of fetching logs from Cloud Logging."
     )
+    parser.add_argument(
+        "--evalset-file",
+        type=str,
+        help="Path to a specific .evalset.json file to use for evaluation."
+    )
+    parser.add_argument(
+        "--original-csv-path",
+        type=str,
+        help="Path to the original eval_test_cases.csv file to merge metrics into."
+    )
     args = parser.parse_args()
+
+    if args.use_evalset_files and not args.original_csv_path:
+        # Infer default original_csv_path based on eval_sets_dir
+        eval_sets_dir = os.path.join(os.path.dirname(__file__), '..', 'agents', 'rag-agent', 'eval_sets')
+        default_csv_path = os.path.join(os.path.dirname(eval_sets_dir), "eval_test_cases.csv")
+        args.original_csv_path = default_csv_path
+        print(f"No original CSV path provided. Defaulting to: {args.original_csv_path}")
 
     if args.export_sessions:
         export_sessions_to_evalset(get_last_run_timestamp() if not args.all_time else None)
@@ -554,45 +598,195 @@ def main():
         else:
             print(f"Warning: move_evalsets.sh not found at {move_script_path} or fallback.")
 
-
-        eval_sets_dir = os.path.join(os.path.dirname(__file__), '..', 'agents', 'rag-agent', 'eval_sets')
         all_eval_cases = []
-        session_id_from_df = None
-        for filename in os.listdir(eval_sets_dir):
-            if filename.endswith(".json") and (".evalset." in filename or "generated_evalset" in filename):
-                filepath = os.path.join(eval_sets_dir, filename)
-                print(f"Processing evalset file: {filename}")
-                with open(filepath, 'r') as f:
-                    eval_set = json.load(f)
-                    eval_set_id = eval_set.get("eval_set_id")
-                    for case in eval_set.get("eval_cases", []):
-                        conversation = case.get("conversation", [])
-                        ground_truth = case.get("ground_truth", {})
-                        
-                        # Determine the reference for the evaluation
-                        case_reference = ground_truth.get("reference", "")
-                        if not case_reference:
-                             case_reference = conversation[-1].get("expected_final_response", {}).get("parts", [{}])[0].get("text", "")
-                        
-                        if conversation:
-                            all_eval_cases.append({
-                                "conversation": conversation,
-                                "session_id": eval_set_id,
-                                "response": conversation[-1].get("final_response", {}).get("parts", [{}])[0].get("text", ""),
-                                "prompt": conversation[0].get("user_content", {}).get("parts", [{}])[0].get("text", ""),
-                                "reference": case_reference,
-                                "ground_truth": ground_truth
-                            })
+        if args.evalset_file:
+            filepath = args.evalset_file
+            print(f"Processing specific evalset file: {os.path.basename(filepath)}")
+            with open(filepath, 'r') as f:
+                eval_set = json.load(f)
+                for case in eval_set.get("eval_cases", []):
+                    conversation = case.get("conversation", [])
+                    ground_truth = case.get("ground_truth", {})
+                    
+                    # Determine the reference for the evaluation
+                    case_reference = ground_truth.get("reference", "")
+                    if not case_reference:
+                         case_reference = conversation[-1].get("expected_final_response", {}).get("parts", [{}])[0].get("text", "")
+                    
+                    if conversation:
+                        all_eval_cases.append({
+                            "conversation": conversation,
+                            "session_id": case.get("eval_id"),
+                            "response": conversation[-1].get("final_response", {}).get("parts", [{}])[0].get("text", ""),
+                            "prompt": conversation[0].get("user_content", {}).get("parts", [{}])[0].get("text", ""),
+                            "reference": case_reference,
+                            "ground_truth": ground_truth
+                        })
+        else:
+            eval_sets_dir = os.path.join(os.path.dirname(__file__), '..', 'agents', 'rag-agent', 'eval_sets')
+            for filename in os.listdir(eval_sets_dir):
+                if filename.endswith(".json") and (".evalset." in filename or "generated_evalset" in filename):
+                    filepath = os.path.join(eval_sets_dir, filename)
+                    print(f"Processing evalset file: {filename}")
+                    with open(filepath, 'r') as f:
+                        eval_set = json.load(f)
+                        for case in eval_set.get("eval_cases", []):
+                            conversation = case.get("conversation", [])
+                            ground_truth = case.get("ground_truth", {})
+                            
+                            # Determine the reference for the evaluation
+                            case_reference = ground_truth.get("reference", "")
+                            if not case_reference:
+                                 case_reference = conversation[-1].get("expected_final_response", {}).get("parts", [{}])[0].get("text", "")
+                            
+                            if conversation:
+                                all_eval_cases.append({
+                                    "conversation": conversation,
+                                    "session_id": case.get("eval_id"),
+                                    "response": conversation[-1].get("final_response", {}).get("parts", [{}])[0].get("text", ""),
+                                    "prompt": conversation[0].get("user_content", {}).get("parts", [{}])[0].get("text", ""),
+                                    "reference": case_reference,
+                                    "ground_truth": ground_truth
+                                })
+
         if all_eval_cases:
             eval_df = pd.DataFrame(all_eval_cases)
+            eval_df.drop_duplicates(subset=['session_id'], inplace=True)
             # Assuming all eval cases come from a single session for now
             # If multiple sessions are processed, this needs to be handled differently
             session_id_from_df = eval_df["session_id"].iloc[0] if not eval_df.empty else None
-            artifacts = run_evaluation_and_generate_artifacts(eval_df=eval_df, all_time=args.all_time, session_id=session_id_from_df)
+            artifacts, final_combined_df = run_evaluation_and_generate_artifacts(eval_df=eval_df, all_time=args.all_time, session_id=session_id_from_df)
+
+            if final_combined_df is not None and not final_combined_df.empty:
+                if args.original_csv_path:
+                    try:
+                        # Use the more robust 'python' engine and specify quoting to handle
+                        # potential commas within the text fields of the CSV.
+                        import csv
+                        original_df = pd.read_csv(args.original_csv_path, sep=',', quotechar='"', doublequote=True, engine='python', on_bad_lines='skip')
+                        original_df.drop_duplicates(subset=['eval_id'], inplace=True)
+                        # Merge original_df with final_combined_df on session_id
+                        # Assuming session_id in final_combined_df corresponds to eval_id in original_df
+                        # This might need adjustment based on the actual content of original_df
+                        # Identify metric columns in final_combined_df (all columns except 'session_id')
+                        metric_cols = [col for col in final_combined_df.columns if col != 'session_id']
+
+                        # Rename metric columns in final_combined_df with a temporary prefix to avoid merge conflicts
+                        rename_map = {col: f'_temp_{col}' for col in metric_cols}
+                        final_combined_df_renamed = final_combined_df.rename(columns=rename_map)
+
+                        # Perform a left merge, explicitly using suffixes to distinguish original and new metric columns
+                        merged_output_df = pd.merge(original_df, final_combined_df, left_on='eval_id', right_on='session_id', how='left', suffixes=('_old', '_new'))
+                        merged_output_df.drop(columns=['session_id'], inplace=True) # Drop redundant session_id column
+
+                        # Iterate through metric columns and replace old values with new ones
+                        metric_cols = [col for col in final_combined_df.columns if col != 'session_id']
+                        for metric_col in metric_cols:
+                            new_col = f'{metric_col}_new'
+                            old_col = f'{metric_col}_old'
+
+                            if new_col in merged_output_df.columns:
+                                # If a new metric value exists, use it
+                                merged_output_df[metric_col] = merged_output_df[new_col]
+                                merged_output_df.drop(columns=[new_col], inplace=True) # Drop the new column
+                            
+                            if old_col in merged_output_df.columns:
+                                # If an old metric column exists, drop it after transferring values
+                                merged_output_df.drop(columns=[old_col], inplace=True)
+
+                        # Ensure all metric columns are present, even if they were not in original_df
+                        for metric_col in metric_cols:
+                            if metric_col not in merged_output_df.columns:
+                                merged_output_df[metric_col] = final_combined_df[metric_col] # This might need re-alignment if not all eval_ids are present
+                                # A more robust way would be to re-merge just the missing columns or use fillna after a full merge
+                                # For now, this assumes final_combined_df has all the necessary data aligned by eval_id/session_id
+                                
+                        # Final cleanup: ensure no duplicate columns remain (e.g., if original_df had a column named 'bleu' and final_combined_df also had 'bleu')
+                        # This is handled by the explicit replacement logic above.
+                        # However, if original_df had a column named 'bleu' and final_combined_df also had 'bleu', the above logic would create 'bleu_old' and 'bleu_new'.
+                        # The above logic should correctly handle this by creating a new 'bleu' column from 'bleu_new' and dropping 'bleu_old'.
+                        # The issue is if original_df had 'bleu' and final_combined_df did NOT have 'bleu', then 'bleu_old' would remain.
+                        # Let's simplify the logic to ensure the final columns are correct.
+
+                        # Re-evaluate the column handling after merge
+                        # The goal is: original_df columns + new metric columns from final_combined_df
+                        # If a column exists in both, take from final_combined_df
+
+                        # Let's try a different approach for column handling after merge
+                        # 1. Merge with suffixes
+                        # 2. Create a list of final columns
+                        # 3. Populate final columns based on _new values, then _old values, then original values
+
+                        # This is the most robust way to handle column precedence:
+                        # For each metric column, if a '_new' version exists, use it. Otherwise, if an '_old' version exists, use it.
+                        # If neither, then it's a new column from final_combined_df.
+
+                        final_cols = list(original_df.columns)
+                        for metric_col in metric_cols:
+                            if f'{metric_col}_new' in merged_output_df.columns:
+                                merged_output_df[metric_col] = merged_output_df[f'{metric_col}_new']
+                            elif f'{metric_col}_old' in merged_output_df.columns:
+                                # This case means the metric was in original_df but not in final_combined_df
+                                # We should keep the original value, but it should have been handled by the merge
+                                pass # No change needed, original value is already in metric_col
+                            else:
+                                # This case means the metric was not in original_df, but is in final_combined_df
+                                # It should have been added by the merge as metric_col_new and then renamed
+                                pass # This should not happen if merge is done correctly
+
+                        # Drop all _old and _new columns
+                        cols_to_drop = [col for col in merged_output_df.columns if col.endswith('_old') or col.endswith('_new')]
+                        merged_output_df.drop(columns=cols_to_drop, inplace=True)
+
+                        # Ensure the order of columns is preserved as much as possible, with new metrics at the end
+                        # This might require reordering columns explicitly if the user has a specific order in mind.
+                        # For now, new metrics will appear at the end.
+
+                        # The previous logic for dropping redundant session_id column is still valid.
+                        # merged_output_df.drop(columns=['session_id'], inplace=True) # This was already done above
+
+                        # Let's simplify the column handling after merge to avoid complexity.
+                        # The goal is to have original columns + new metric columns.
+                        # If a metric column exists in original_df, its value should be updated from final_combined_df.
+
+                        # This is the most straightforward way to achieve the desired behavior:
+                        # 1. Merge with suffixes.
+                        # 2. For each metric column, create a new column with the base name.
+                        # 3. Populate this new column with values from the '_new' column (calculated metrics).
+                        # 4. Drop the '_old' and '_new' columns.
+
+                        # This ensures that the calculated metrics always take precedence.
+
+                        # Initialize metric columns in original_df if they don't exist
+                        for col in ['bleu', 'contains_words', 'rouge']:
+                            if col not in original_df.columns:
+                                original_df[col] = np.nan # Or ''
+
+                        # Merge final_combined_df into original_df
+                        # This will add columns from final_combined_df to original_df for matching rows
+                        # and create new columns if they don't exist.
+                        merged_output_df = pd.merge(original_df, final_combined_df, left_on='eval_id', right_on='session_id', how='left', suffixes=('', '_y'))
+
+                        # Update the metric columns in merged_output_df with values from final_combined_df
+                        for col in ['bleu', 'contains_words', 'rouge']:
+                            if f'{col}_y' in merged_output_df.columns:
+                                merged_output_df[col] = merged_output_df[f'{col}_y']
+                                merged_output_df.drop(columns=[f'{col}_y'], inplace=True)
+                        
+                        # Drop the redundant 'session_id' column from the merged DataFrame
+                        if 'session_id' in merged_output_df.columns:
+                            merged_output_df.drop(columns=['session_id'], inplace=True)
+
+                        merged_output_df.to_csv(args.original_csv_path, index=False)
+                        print(f"Combined evaluation results saved to original CSV: {args.original_csv_path}")
+                    except FileNotFoundError:
+                        print(f"Error: Original CSV file not found at {args.original_csv_path}. Cannot save results to the original CSV.")
+                else:
+                    print("Warning: No original CSV path provided and no default could be inferred. Metrics will not be saved to a CSV file.")
         else:
             print("No evalset files found or no cases to evaluate.")
     else:
-        run_evaluation_and_generate_artifacts(all_time=args.all_time)
+        artifacts, final_combined_df = run_evaluation_and_generate_artifacts(all_time=args.all_time)
 
 if __name__ == "__main__":
     main()

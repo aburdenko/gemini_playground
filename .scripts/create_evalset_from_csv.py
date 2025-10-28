@@ -9,6 +9,7 @@ def create_evalset_from_csv(csv_path, json_path):
         for row in reader:
             eval_cases.append({
                 "eval_id": row["eval_id"],
+                "eval_set_id": row["eval_id"], # Use eval_id as eval_set_id
                                         "conversation": [
                                             {
                                                 "user_content": {"parts": [{"text": row["user_content"]}]},
@@ -18,12 +19,19 @@ def create_evalset_from_csv(csv_path, json_path):
                     "app_name": "rag-agent",
                     "user_id": "test_user"
                 },
-                "ground_truth": {
-                    "reference": row["reference"],  # Add a generic 'reference' key
-                    row["metric"]: row["reference"],
-                    "metric_type": row["metric"]
-                }
             })
+
+            # Determine the metric, defaulting to 'bleu' if the column is missing
+            metric = row.get("metric", "bleu").strip()
+            if not metric: # Handle cases where the metric column exists but is empty
+                metric = "bleu"
+
+            # Construct the ground_truth object
+            eval_cases[-1]["ground_truth"] = {
+                "reference": row.get("reference", ""),
+                metric: row.get("reference", ""),
+                "metric_type": metric
+            }
 
     eval_set = {
         "eval_set_id": "generated_from_csv",
