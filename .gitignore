@@ -1,29 +1,13 @@
-# Python virtual environment
-.venv/
-
-# Python cache files
-__pycache__/
-*.pyc
-
-# Generated output and artifact files
-*output.md
-*.html
-*.csv
-*.png
-last_run_timestamp.txt
-paul.prompt.*
-.scripts/exclusions_340b_rebate.yaml
-.vscode/exclusions_340b_rebate.yaml
-prompts/exclusions_340b_rebate.yaml
-templates/exclusions.prompt.template.md
+agents/nohup.out
 nohup.out
-.env
-agents/rag-agent/uv.lock
-agents/rag-agent/.adk/**
-agents/rag-agent/eval_sets/**
-agents/rag-agent/evalset52ada5.evalset.json
-agents/rag-agent/evalset219e1e.evalset.json
-agents/rag-agent/evalsete04bd4.evalset.json
-agents/rag-agent/uv.lock
-.env
-package-lock.json
+.scripts/__pycache__/adk_utils.cpython-312.pyc
+.scripts/exclusions_340b_rebate.yaml
+.scripts/__pycache__/
+.venv/
+.vscode/exclusions_340b_rebate.yaml
+agents/rag-agent/.adk/
+agents/rag-agent/eval_sets/*.png
+*-lock.json
+agents/**/*.json
+prompts/**/*.output.md
+last_run_timestamp.txt

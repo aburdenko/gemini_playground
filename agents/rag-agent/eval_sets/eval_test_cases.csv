@@ -1,0 +1,5 @@
+eval_id,user_content,reference,metric,bleu,contains_words,rouge
+entrance,How did Alice get to Wonderland?,rabbit hole,contains_words,,1.0,
+entrance_bleu,How did Alice get to Wonderland?,The rabbit hole,bleu,0.0,,
+advocate,Who was Alice's greatest advocate?,Peter Rabbit,bleu,0.0,,
+sentiment,Did Alice like Wonderland?,No,rouge,,,1.0
