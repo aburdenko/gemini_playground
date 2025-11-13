@@ -26,7 +26,7 @@ from vertexai.preview.evaluation import EvalTask, AutoraterConfig
 PROJECT_ID = os.environ.get("PROJECT_ID", "your-gcp-project-id")
 LOCATION = os.environ.get("REGION", "us-central1")
 BUCKET_NAME = os.environ.get("STAGING_GCS_BUCKET", "your-bucket-name")
-JUDGEMENT_MODEL_NAME = os.environ.get("JUDGEMENT_MODEL_NAME", "gemini-1.5-flash")
+JUDGEMENT_MODEL_NAME = os.environ.get("JUDGEMENT_MODEL_NAME", "gemini-2.5-flash")
 EXPERIMENT_NAME = "gemini-playground-evaluation"
 
 logger = logging.getLogger(__name__)

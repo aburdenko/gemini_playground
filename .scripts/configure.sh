@@ -1,9 +1,27 @@
 # Usage: source .scripts/configure.sh
- if ! command -v gemini &> /dev/null; then
-  echo "Gemini CLI not found. Installing globally..."
-  sudo npm install -g @google/gemini-cli
+
+# --- Gemini CLI Installation/Update ---
+if ! command -v npm &> /dev/null; then
+  echo "Error: npm is not installed. Please install Node.js and npm to continue." >&2
+  return 1
+fi
+
+echo "Checking for the latest Gemini CLI version..."
+LATEST_VERSION=$(npm view @google/gemini-cli version)
+
+if ! command -v gemini &> /dev/null; then
+  echo "Gemini CLI not found. Installing the latest version ($LATEST_VERSION)..."
+  sudo npm install -g @google/gemini-cli@latest
 else
-  echo "Gemini CLI is already installed."
+  # Extract version from `npm list`, which is more reliable than `gemini --version`
+  INSTALLED_VERSION=$(npm list -g @google/gemini-cli --depth=0 2>/dev/null | grep '@google/gemini-cli' | sed 's/.*@//')
+  if [ "$INSTALLED_VERSION" == "$LATEST_VERSION" ]; then
+    echo "Gemini CLI is already up to date (version $INSTALLED_VERSION)."
+  else
+    echo "A new version of Gemini CLI is available."
+    echo "Upgrading from version $INSTALLED_VERSION to $LATEST_VERSION..."
+    sudo npm install -g @google/gemini-cli@latest
+  fi
 fi
 
 
@@ -134,6 +152,16 @@ if [ ! -d ".venv/python3.12" ]; then
   gcloud storage buckets add-iam-policy-binding gs://$STAGING_GCS_BUCKET \
     --member="serviceAccount:service-$PROJECT_NUMBER@gcp-sa-aiplatform.iam.gserviceaccount.com" \
     --role="roles/storage.objectViewer"
+
+  # Grant the Vertex AI Service Agent the necessary role to create objects in the staging bucket
+  gcloud storage buckets add-iam-policy-binding gs://$STAGING_GCS_BUCKET \
+    --member="serviceAccount:service-$PROJECT_NUMBER@gcp-sa-aiplatform.iam.gserviceaccount.com" \
+    --role="roles/storage.objectCreator"
+
+  # Grant the Vertex AI Service Agent the necessary role to create objects in the staging bucket
+  gcloud storage buckets add-iam-policy-binding gs://$STAGING_GCS_BUCKET \
+    --member="serviceAccount:service-$PROJECT_NUMBER@gcp-sa-aiplatform.iam.gserviceaccount.com" \
+    --role="roles/storage.objectCreator"
     
   # --- Ensure 'unzip' is installed for VSIX validation ---
   if ! command -v unzip &> /dev/null; then
@@ -295,7 +323,7 @@ adkweb() {
   # server that loads the ADK app and injects our logging middleware. This approach
   # bypasses the `adk web` command, avoiding issues with older ADK versions that
   # lack the --bootstrap flag, and prevents the server from hanging.
-  "$(dirname "$script_dir")/.venv/python3.12/bin/python3" "$(dirname "$script_dir")/.scripts/run_adk_web_with_logging.py"
+  nohup "$(dirname "$script_dir")/.venv/python3.12/bin/python3" "$(dirname "$script_dir")/.scripts/run_adk_web_with_logging.py">output.log 2>&1  &
 }
 
 export PATH=$PATH:$HOME/.local/bin:.scripts

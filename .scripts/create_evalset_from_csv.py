@@ -14,7 +14,7 @@ def create_evalset_from_csv(csv_path, json_path):
                                             {
                                                 "invocation_id": f"e-{row['eval_id']}",
                                                 "user_content": {"parts": [{"text": row["user_content"]}]},
-                                                "final_response": {"parts": [{"text": row["reference"]}]}
+                                                "final_response": {"parts": [{"text": row["agent_response"]}]}
                                             }
                                         ],                "session_input": {
                     "app_name": "rag-agent",
@@ -28,7 +28,6 @@ def create_evalset_from_csv(csv_path, json_path):
                 "reference": row.get("reference", ""),
             }
             if metric:
-                ground_truth[metric] = row.get("reference", "")
                 ground_truth["metric_type"] = metric
             else:
                 ground_truth["metric_type"] = None # No metric to calculate

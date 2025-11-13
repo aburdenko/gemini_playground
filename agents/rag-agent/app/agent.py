@@ -22,6 +22,8 @@ from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
 from opentelemetry.sdk.trace import TracerProvider, export
 from google.adk.tools.retrieval.vertex_ai_rag_retrieval import VertexAiRagRetrieval
 from vertexai.preview import rag
+from app.tools import read_file
+from google.adk.tools import FunctionTool
 
 LLM_LOCATION = "global"
 LOCATION = "us-central1"
@@ -53,5 +55,5 @@ root_agent = Agent(
     name="root_agent",
     model=LLM,
     instruction=instruction,
-    tools=[vertex_rag_tool],
+    tools=[vertex_rag_tool, read_file],
 )

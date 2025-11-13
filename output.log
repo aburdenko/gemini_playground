@@ -1,0 +1,820 @@
+nohup: ignoring input
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+--- Starting ADK Web Server with custom logging ---
+ADK will manage its own internal OpenTelemetry tracing.
+INFO:     Will watch for changes in these directories: ['/home/user/gemini_playground']
+INFO:     Uvicorn running on http://127.0.0.1:8001 (Press CTRL+C to quit)
+INFO:     Started reloader process [13034] using StatReload
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [13079]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+DEBUG: LoggingMiddleware entered for path: /
+INFO:     127.0.0.1:42494 - "GET / HTTP/1.1" 307 Temporary Redirect
+DEBUG: LoggingMiddleware entered for path: /dev-ui/assets/config/runtime-config.json
+INFO:     127.0.0.1:42494 - "GET /dev-ui/assets/config/runtime-config.json HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /list-apps
+INFO:     127.0.0.1:42494 - "GET /list-apps?relative_path=./ HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/users/user/sessions
+INFO:     127.0.0.1:42494 - "POST /apps/rag-agent/users/user/sessions HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/eval_sets
+INFO:     127.0.0.1:42494 - "GET /apps/rag-agent/eval_sets HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/eval_results
+INFO:     127.0.0.1:41942 - "GET /apps/rag-agent/eval_results HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/users/user/sessions
+INFO:     127.0.0.1:42494 - "GET /apps/rag-agent/users/user/sessions HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/eval_results/rag-agent_evalset575c19_1763002942.1069586
+INFO:     127.0.0.1:42494 - "GET /apps/rag-agent/eval_results/rag-agent_evalset575c19_1763002942.1069586 HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/eval_results/rag-agent_evalsetc7f6ab_1763000111.6119924
+INFO:     127.0.0.1:41942 - "GET /apps/rag-agent/eval_results/rag-agent_evalsetc7f6ab_1763000111.6119924 HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/eval_results/rag-agent_evalsetf4729c_1763003476.1903408
+INFO:     127.0.0.1:41942 - "GET /apps/rag-agent/eval_results/rag-agent_evalsetf4729c_1763003476.1903408 HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/eval_results/rag-agent_evalsetf4729c_1763042738.2239141
+INFO:     127.0.0.1:41942 - "GET /apps/rag-agent/eval_results/rag-agent_evalsetf4729c_1763042738.2239141 HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/eval_results/rag-agent_evalsetf4729c_1763046957.09863
+INFO:     127.0.0.1:42494 - "GET /apps/rag-agent/eval_results/rag-agent_evalsetf4729c_1763046957.09863 HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/eval_results/rag-agent_evalsetf4729c_1763041851.9506958
+INFO:     127.0.0.1:42494 - "GET /apps/rag-agent/eval_results/rag-agent_evalsetf4729c_1763041851.9506958 HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/eval_results/rag-agent_evalset67e765_1762989747.6606655
+INFO:     127.0.0.1:41942 - "GET /apps/rag-agent/eval_results/rag-agent_evalset67e765_1762989747.6606655 HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/eval_results/rag-agent_evalsetf4729c_1763043180.7081888
+INFO:     127.0.0.1:41942 - "GET /apps/rag-agent/eval_results/rag-agent_evalsetf4729c_1763043180.7081888 HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/eval_results/rag-agent_evalsetf4729c_1763043288.5261562
+INFO:     127.0.0.1:41942 - "GET /apps/rag-agent/eval_results/rag-agent_evalsetf4729c_1763043288.5261562 HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/eval_results/rag-agent_evalset224918_1763047909.0047631
+INFO:     127.0.0.1:42494 - "GET /apps/rag-agent/eval_results/rag-agent_evalset224918_1763047909.0047631 HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/users/user/sessions
+INFO:     127.0.0.1:41942 - "GET /apps/rag-agent/users/user/sessions HTTP/1.1" 200 OK
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/adk_web_server.py:475: UserWarning: [EXPERIMENTAL] App: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  agentic_app = App(
+DEBUG: LoggingMiddleware entered for path: /run_sse
+DEBUG: LoggingMiddleware received body: {"appName":"rag-agent","userId":"user","sessionId":"ccfe4d22-0762-4e04-9d26-ac97df25411f","newMessage":{"role":"user","parts":[{"text":"What would a trained psychologist say is Alice's main problem?"}]},"streaming":false,"stateDelta":null}
+DEBUG: Raw response body: data: {"content":{"parts":[{"thoughtSignature":"CscVAePx_17e9cZ2PtQ7VJfbEeSksFMcl0cHrZPSiXPmYcVdzNg3A9BmdbCSz7vIJ70gpoHuVG-iWn-VdUMOPxgoIgDAggVfJIpq5MfA6p1iyxXRt-nJs-SjQ7LGx4vfhgDbIvD0FisSBBMEjtfuSh-P0Lnu70MwV5UQcr30xWFXJu8lqcVbu16nb51q4Bi8N5E72XxFvmhGLubmF9yYDWCbi9LoZn7L9-jaCaNdTqquVoEe2WRMCkChutGQ3SumkeC-pQxL7QPOIOFScT8HAzYCFUvxGGSIyMoDRnykCLQgkOIVQtQwaHzsEoWRwPqBuyv-VKF5YKwA277793NDaGjGM2Od8pmni8HZsouYJzHFU0VGxH1tW7BbXH6bGqP0XmQ5qZK3bmOXvsFLzFmb6vYKNMTJnLllYnrj81LE3AYf706aEqTUDyQRzo_XtfOzvu5aFA9Vzn6F9a9RtwkXQFsWqMQRvlVFUroSWbGBgS3xzPNwxRMZ9l0qRkqmm8KNZOZyjgi9NDubkCEcQ5aVcUvuWcSHEotaCp7zShc2qGXAtsismum1d4VOGrQLu9nK3_lAKI0SRmsWA7u-grW2I7IMTFykFHvgwAYiw0LoyJb9qYqapOjelz1z0vCIDcih40UmNyIh8Hy1Fw5J-3TuY5btfkIUi-3aABz-I7Moo0CkqhHagQrL7QpLOt4upVcCKWMO_5pyp6ailomlkX0pacj_9zJMvrII7OPc8Y9-rs6rBtVWLdfvlZfiYJWpP5BEMJ0GeRkFTAi0t6pHBFVDWF9k_oGjzxRK0_eTa8xTXbfrnaiDjxmStR3xX12RORUM_7dgtStA1wVaR2QmFn--SeMjbZmxGRRa-O-F2jGgmSXuDhXmPJgRlF6tBgLghBOsGsw7IAd2LJsfSP_un70yMJjOgLSjtcZP1uDyiAyTE8xTRjLwKKZv3qxG34JcccPK3BXLuroYYS-qognyPU5YpEpVPpfAJRnnaxJRYlW3jssxpW3DYmiufi6SMXFXcFhDvrARwlAsQDPd6o8drPzZ6h_o3IlmkG5R6RRL-3k4WMMe4ij0KEi25Dok9GWyWRLSp36vqYSAfQbKLHf4uuNfXOI5nmutqCRWMwjFyFElDpPbpRMoO-TIqXe81vejDqbVWBQEDDeRSyzlc_DYSKnWa0QIEnpBcQA4aBNPzCFRGCd2_D1KObu8kfg7XXLKYdgI_vTbewFh_aMwFg-gb1HjnX7SvmcwPJv2Gw_84b3zDrV43pU5OeS-HeJWb_bALytXah0zh0vA-fwiYLuUwqgUze2maLWnp5W2iYjwDx7c_oB0l_kjo7-pFy_eS_ZIfUzDHanUPJgPUzI6nr3Z58FlmsFy19FWfeEig7h2dm2PUF9P1SS7EYMzG4V08K9yRCkTubunq1i9fIS1_b2XDRbcuJjaQ2nFrS2xjgvLw-I4wM2YCxIRD4kIkg5edocrzr0IfEQpf1oMicox-BOSPKYfWW74UsVTJRhgB5ZlBbDmbBOTSraOWJGrsCiFYACg5bUnfxdXXjhHX-X5eHFU6vIuOnJaVa_9ynDdTZalliMeVstxw4e-IZpM68c39NF9lMRJ3fH-DL2I1xahC-2OPowwkt9pE5dmRrcB50WQBHdEIf37Pn5W1ciIT89hMDTYjA6XQkZ320nj-_WIVrSrk3c1dC-FP3hYwvDIG3R4TT3YJUMQap_tXI7Ht2UR3cqwOvssSgxRaohYz62Q9Dwvmcw0GuTy9fQELmjtCIJyVjl1RfipG8uugct4vAuvWFR5ESYwrAQgML-NRgDjisJMr21wGcvUJurb7fGICWBsX3DUDDDMbXUZrG1wWwTDRFefRjBVkxKqXw3_rFtGeXKOpfbc8b6Pi23BAyJE3Q5bPscvsyHDI9xyPQwPnvxsS0zYp2ix2AGYTL0CDi5iqAiSwzSWib8Ckn7SwJK79i_ibXRfLaDwXZwSfAXeTNpnHUBVXOAm0o8LTYmghiHnqLlI9XamJ6KYwjmlD6o49UWQUKyTY1awzBJESRHecDKXE7FGIk1qO1TLQXglKpbOpQ0zGiMHFzmvQPFTaflhO1ZugZEZjp7ciOB3jyYDY914smMxvSgh8xxYqL8WBoDkHGYvr-04G-E5XZzTjdKpPscUG9pIOLxlaLy2TWxgxx-uKLIkNdVmxY1HqsxPBaio8BDvFBCRWQ5QpEkOjuGkBLuMvyrgej7yOde-Y7sOKjyJaIkut3XrA4G0S3LLEzYWhr9rDpWxEt32hj5aqcPuP9eC-T8GWDfRh92AYItjsozpx7YAnCExjHjPxU-HKje3HL9uvnA6im_KUszBqfYXqx6BOLPrHTTQ4Sc1qOCMhWeMqZLI_iCIM_G8fKDFBBFnYrqh7prGHO7bgeFj76tZv0cnt65Ly86jS0ZL7D4HQ-Em6V5EgPWDOCtTzeHed-HqjKiiRFlRqLBV8lx-d3ua-4Fqt8a82Qm8wzkdNdbF68XMa2HHlpF4DAZyc1NdgqckQ7y3YV3-1ANhDiS3cYFLJdB358FFAhByVn9MHSELwBo_ox24En6qwvDJeWZreG-9BOs5z7s1DruHn4yOBwugT20QJ_INXYdzseHtnmJ4sHFLegii0jFZfWF5ccdbaj-7-ZSh7ZQaU0NlH-34kXUrZAFBXPaQYInfDBIRlNCP7nZ0LTxMdAz3KY4xo9p-zQ2Q3FS2MLmKrGg-imnwFc9IP6FGJGlQjyP3Wz0nVmOtKUUdHnOJ5S40bTa8ooM1YuNbfPNVsKLajjTXPI0vHcb_aEYapxxXmn8h6WJqYfr9RbagtlnZSQ2xUmHVOHwERmSkYQCqG09Lo2wklbZ8fKr_1QzeXQPMp162ctT2I5pM75udkcTnUb_ajHIN_j4kJmL0Sth45RGQIW_TdnZNSqphC1-kE0zunOn8U8m9CX5hOgBlm6xzYoHp2LOQnPxCnn2apVjYm1xyN6pYt8n5Yn92Ua0kflNUnZLq3aRa9KN6v6dsBhnP9vcGL-oEBdOoVtd2uDGalL_s6yBp8tlDhdVIsrRRXbWwVSYoymGnf3EZ_7K37j2mCUqG1-ngrQ7ZmNWAj5urMa5QfpG5SR1OEr_AkUvb5iknFY_GUB2R82EmOtSA9wFyR_V6ZEKLk-0cSr82v-I-zwcyU637drpDKYnpN-WaP5uWCixnpRkVctGCxY43a_2MIrELNNngjw4_x79U5vkZpqCCpAJunqn1552mcAt4OCenrxvARfULsZRLHsv_7SotgND-iDIBeL54drpHn0UUDezi_VeymTIuzr0GCOyLvZM_YazzV1kVx3SR5AVuJnO0s1KV3d97dcdkFjnppAYNgsB-Cj5fHjhos85p2BYajR-IdnLaEJHu2cPGNDTiM1dccBBeClDX30cglC0I7zKGfwtM0HBVZfk_OqACtpIE0cB79GIZWvijSpxEREYn_bPnReT20S2G8q8hURUD7uJhdI5OkYtHtAz3Db3yLOcSP3aLytPUbA7v2EdPeaRxC5Pp7uVPCdhvD4mfceCEJgcbMHXDid0mqO7IWAhwFFLyW8ZGINe5vDJFEVub_eLu3JTiB-dK7fBbm6_0HmnhomhTw_CGnU9PcrXTQjBMXBifyZVr_jPRyDWr20SXCOKsUYxYdpj3j3QmYIsAKOkImNUaDv_oB-Ec74B2vcLpOB8=","text":"A trained psychologist would likely identify Alice's main problem as a significant **identity crisis** and **emotional dysregulation**, exacerbated by the highly unusual and disorienting circumstances she finds herself in.\n\nShe frequently questions \"Who in the world am I?\" and expresses that she is \"not myself,\" struggling to reconcile her perception of herself with the constant changes in her size and surroundings. This leads to confusion and difficulty explaining herself to others.\n\nFurthermore, Alice exhibits considerable internal conflict and self-reprimand, often scolding herself severely and even wishing to \"box her own ears\" for perceived wrongdoings. She also experiences intense emotional shifts, crying \"gallons of tears\" and then abruptly stopping, indicating a struggle to manage her feelings. She expects \"nothing but out-of-the-way things to happen,\" which suggests a disconnect from typical reality and an unusual expectation of her environment."}],"role":"model"},"groundingMetadata":{"groundingChunks":[{"retrievedContext":{"ragChunk":{"pageSpan":{"firstPage":1,"lastPage":51},"text":"“Who are you?” said the Caterpillar.\r\nThis was not an encouraging opening for a conversation. Alice replied, rather shyly, “I—I hardly know, sir,\r\njust at present—at least I know who I was when I got up this morning, but I think I must have been changed\r\nseveral times since then.”\r\n“What do you mean by that?” said the Caterpillar sternly. “Explain yourself!”\r\n“I can’t explain myself, I’m afraid, sir,” said Alice, “because I’m not myself, you see.”\r\n“I don’t see,” said the Caterpillar.\r\n“I’m afraid I can’t put it more clearly,” Alice replied very politely, “for I can’t understand it myself to begin\r\nwith; and being so many different sizes in a day is very confusing.”\r\n“It isn’t,” said the Caterpillar.\r\n“Well, perhaps you haven’t found it so yet,” said Alice; “but when you have to turn into a chrysalis—you will\r\nsome day, you know—and then after that into a butterfly, I should think you’ll feel it a little queer, won’t you?”\r\n“Not a bit,” said the Caterpillar.\r\n“Well, perhaps your feelings may be different,” said Alice; “all I know is, it would feel very queer to me.”\r\n“You!” said the Caterpillar contemptuously. “Who are you?”\r\nWhich brought them back again to the beginning of the conversation. Alice felt a little irritated at the\r\nCaterpillar’s making such very short remarks, and she drew herself up and said, very gravely, “I think, you ought\r\nto tell me who you are, first.”\r\n“Why?” said the Caterpillar.\r\nHere was another puzzling question; and as Alice could not think of any good reason, and as the Caterpillar\r\nseemed to be in a very unpleasant state of mind, she turned away.\r\n“Come back!” the Caterpillar called after her. “I’ve something important to say!”\r\nThis sounded promising, certainly: Alice turned and came back again.\r\n“Keep your temper,” said the Caterpillar.\r\n“Is that all?” said Alice, swallowing down her anger as well as she could.\r\n“No,” said the Caterpillar."},"text":"“Who are you?” said the Caterpillar.\r\nThis was not an encouraging opening for a conversation. Alice replied, rather shyly, “I—I hardly know, sir,\r\njust at present—at least I know who I was when I got up this morning, but I think I must have been changed\r\nseveral times since then.”\r\n“What do you mean by that?” said the Caterpillar sternly. “Explain yourself!”\r\n“I can’t explain myself, I’m afraid, sir,” said Alice, “because I’m not myself, you see.”\r\n“I don’t see,” said the Caterpillar.\r\n“I’m afraid I can’t put it more clearly,” Alice replied very politely, “for I can’t understand it myself to begin\r\nwith; and being so many different sizes in a day is very confusing.”\r\n“It isn’t,” said the Caterpillar.\r\n“Well, perhaps you haven’t found it so yet,” said Alice; “but when you have to turn into a chrysalis—you will\r\nsome day, you know—and then after that into a butterfly, I should think you’ll feel it a little queer, won’t you?”\r\n“Not a bit,” said the Caterpillar.\r\n“Well, perhaps your feelings may be different,” said Alice; “all I know is, it would feel very queer to me.”\r\n“You!” said the Caterpillar contemptuously. “Who are you?”\r\nWhich brought them back again to the beginning of the conversation. Alice felt a little irritated at the\r\nCaterpillar’s making such very short remarks, and she drew herself up and said, very gravely, “I think, you ought\r\nto tell me who you are, first.”\r\n“Why?” said the Caterpillar.\r\nHere was another puzzling question; and as Alice could not think of any good reason, and as the Caterpillar\r\nseemed to be in a very unpleasant state of mind, she turned away.\r\n“Come back!” the Caterpillar called after her. “I’ve something important to say!”\r\nThis sounded promising, certainly: Alice turned and came back again.\r\n“Keep your temper,” said the Caterpillar.\r\n“Is that all?” said Alice, swallowing down her anger as well as she could.\r\n“No,” said the Caterpillar.","title":"AliceInWonderland.pdf","uri":"gs://rag-engine-eval-service/AliceInWonderland.pdf"}},{"retrievedContext":{"ragChunk":{"pageSpan":{"firstPage":1,"lastPage":51},"text":"Poor Alice! It was as much as she could do, lying down on one side, to look through into the garden with one\r\neye; but to get through was more hopeless than ever: she sat down and began to cry again.\r\n“You ought to be ashamed of yourself,” said Alice, “a great girl like you,” (she might well say this), “to go on\r\ncrying in this way! Stop this moment, I tell you!” But she went on all the same, shedding gallons of tears, until\r\nthere was a large pool all round her, about four inches deep and reaching half down the hall.\r\nAfter a time she heard a little pattering of feet in the distance, and she hastily dried her eyes to see what was\r\ncoming. It was the White Rabbit returning, splendidly dressed, with a pair of white kid gloves in one hand and a\r\nlarge fan in the other: he came trotting along in a great hurry, muttering to himself as he came, “Oh! the Duchess,\r\nthe Duchess! Oh! won’t she be savage if I’ve kept her waiting!” Alice felt so desperate that she was ready to ask\r\nhelp of any one; so, when the Rabbit came near her, she began, in a low, timid voice, “If you please, sir—” The\r\nRabbit started violently, dropped the white kid gloves and the fan, and skurried away into the darkness as hard as\r\nhe could go.\r\nAlice took up the fan and gloves, and, as the hall was very hot, she kept fanning herself all the time she went\r\non talking: “Dear, dear! How queer everything is to-day! And yesterday things went on just as usual. I wonder if\r\nI’ve been changed in the night? Let me think: was I the same when I got up this morning? I almost think I can\r\nremember feeling a little different. But if I’m not the same, the next question is, Who in the world am I? Ah,\r\nthat’s the great puzzle!” And she began thinking over all the children she knew that were of the same age as\r\nherself, to see if she could have been changed for any of them."},"text":"Poor Alice! It was as much as she could do, lying down on one side, to look through into the garden with one\r\neye; but to get through was more hopeless than ever: she sat down and began to cry again.\r\n“You ought to be ashamed of yourself,” said Alice, “a great girl like you,” (she might well say this), “to go on\r\ncrying in this way! Stop this moment, I tell you!” But she went on all the same, shedding gallons of tears, until\r\nthere was a large pool all round her, about four inches deep and reaching half down the hall.\r\nAfter a time she heard a little pattering of feet in the distance, and she hastily dried her eyes to see what was\r\ncoming. It was the White Rabbit returning, splendidly dressed, with a pair of white kid gloves in one hand and a\r\nlarge fan in the other: he came trotting along in a great hurry, muttering to himself as he came, “Oh! the Duchess,\r\nthe Duchess! Oh! won’t she be savage if I’ve kept her waiting!” Alice felt so desperate that she was ready to ask\r\nhelp of any one; so, when the Rabbit came near her, she began, in a low, timid voice, “If you please, sir—” The\r\nRabbit started violently, dropped the white kid gloves and the fan, and skurried away into the darkness as hard as\r\nhe could go.\r\nAlice took up the fan and gloves, and, as the hall was very hot, she kept fanning herself all the time she went\r\non talking: “Dear, dear! How queer everything is to-day! And yesterday things went on just as usual. I wonder if\r\nI’ve been changed in the night? Let me think: was I the same when I got up this morning? I almost think I can\r\nremember feeling a little different. But if I’m not the same, the next question is, Who in the world am I? Ah,\r\nthat’s the great puzzle!” And she began thinking over all the children she knew that were of the same age as\r\nherself, to see if she could have been changed for any of them.","title":"AliceInWonderland.pdf","uri":"gs://rag-engine-eval-service/AliceInWonderland.pdf"}},{"retrievedContext":{"ragChunk":{"pageSpan":{"firstPage":1,"lastPage":51},"text":"when she got to the door, she found she had forgotten the little golden key, and when she went back\r\nto the table for it, she found she could not possibly reach it: she could see it quite plainly through the glass, and\r\nshe tried her best to climb up one of the legs of the table, but it was too slippery; and when she had tired herself\r\nout with trying, the poor little thing sat down and cried.\r\n“Come, there’s no use in crying like that!” said Alice to herself, rather sharply; “I advise you to leave off this\r\nminute!” She generally gave herself very good advice, (though she very seldom followed it), and sometimes she\r\nscolded herself so severely as to bring tears into her eyes; and once she remembered trying to box her own ears\r\nfor having cheated herself in a game of croquet she was playing against herself, for this curious child was very\r\nfond of pretending to be two people. “But it’s no use now,” thought poor Alice, “to pretend to be two people!\r\nWhy, there’s hardly enough of me left to make one respectable person!”\r\nSoon her eye fell on a little glass box that was lying under the table: she opened it, and found in it a very small\r\ncake, on which the words “EAT ME” were beautifully marked in currants. “Well, I’ll eat it,” said Alice, “and if it\r\nmakes me grow larger, I can reach the key; and if it makes me grow smaller, I can creep under the door; so either\r\nway I’ll get into the garden, and I don’t care which happens!”\r\nShe ate a little bit, and said anxiously to herself, “Which way? Which way?”, holding her hand on the top of\r\nher head to feel which way it was growing, and she was quite surprised to find that she remained the same size:\r\nto be sure, this generally happens when one eats cake, but Alice had got so much into the way of expecting\r\nnothing but out-of-the-way things to happen, that it seemed quite dull and stupid for life to go on in the common\r\nway.\r\nSo she set to work, and very soon finished off the cake."},"text":"when she got to the door, she found she had forgotten the little golden key, and when she went back\r\nto the table for it, she found she could not possibly reach it: she could see it quite plainly through the glass, and\r\nshe tried her best to climb up one of the legs of the table, but it was too slippery; and when she had tired herself\r\nout with trying, the poor little thing sat down and cried.\r\n“Come, there’s no use in crying like that!” said Alice to herself, rather sharply; “I advise you to leave off this\r\nminute!” She generally gave herself very good advice, (though she very seldom followed it), and sometimes she\r\nscolded herself so severely as to bring tears into her eyes; and once she remembered trying to box her own ears\r\nfor having cheated herself in a game of croquet she was playing against herself, for this curious child was very\r\nfond of pretending to be two people. “But it’s no use now,” thought poor Alice, “to pretend to be two people!\r\nWhy, there’s hardly enough of me left to make one respectable person!”\r\nSoon her eye fell on a little glass box that was lying under the table: she opened it, and found in it a very small\r\ncake, on which the words “EAT ME” were beautifully marked in currants. “Well, I’ll eat it,” said Alice, “and if it\r\nmakes me grow larger, I can reach the key; and if it makes me grow smaller, I can creep under the door; so either\r\nway I’ll get into the garden, and I don’t care which happens!”\r\nShe ate a little bit, and said anxiously to herself, “Which way? Which way?”, holding her hand on the top of\r\nher head to feel which way it was growing, and she was quite surprised to find that she remained the same size:\r\nto be sure, this generally happens when one eats cake, but Alice had got so much into the way of expecting\r\nnothing but out-of-the-way things to happen, that it seemed quite dull and stupid for life to go on in the common\r\nway.\r\nSo she set to work, and very soon finished off the cake.","title":"AliceInWonderland.pdf","uri":"gs://rag-engine-eval-service/AliceInWonderland.pdf"}},{"retrievedContext":{"ragChunk":{"pageSpan":{"firstPage":1,"lastPage":51},"text":"There was no\r\nlabel this time with the words “DRINK ME,” but nevertheless she uncorked it and put it to her lips. “I know\r\nsomething interesting is sure to happen,” she said to herself, “whenever I eat or drink anything; so I’ll just see\r\nwhat this bottle does. I do hope it’ll make me grow large again, for really I’m quite tired of being such a tiny\r\nlittle thing!”\r\nIt did so indeed, and much sooner than she had expected: before she had drunk half the bottle, she found her\r\nhead pressing against the ceiling, and had to stoop to save her neck from being broken. She hastily put down the\r\nbottle, saying to herself “That’s quite enough—I hope I shan’t grow any more—As it is, I can’t get out at the\r\ndoor—I do wish I hadn’t drunk quite so much!”\r\nAlas! it was too late to wish that! She went on growing, and growing, and very soon had to kneel down on the\r\nfloor: in another minute there was not even room for this, and she tried the effect of lying down with one elbow\r\nagainst the door, and the other arm curled round her head. Still she went on growing, and, as a last resource, she\r\nput one arm out of the window, and one foot up the chimney, and said to herself “Now I can do no more,\r\nwhatever happens. What will become of me?”\r\nLuckily for Alice, the little magic bottle had now had its full effect, and she grew no larger: still it was very\r\nuncomfortable, and, as there seemed to be no sort of chance of her ever getting out of the room again, no wonder\r\nshe felt unhappy.\r\n“It was much pleasanter at home,” thought poor Alice, “when one wasn’t always growing larger and smaller,\r\nand being ordered about by mice and rabbits. I almost wish I hadn’t gone down that rabbit-hole—and yet—and\r\nyet—it’s rather curious, you know, this sort of life! I do wonder what can have happened to me! When I used to\r\nread fairy-tales, I fancied that kind of thing never happened, and now here I am in the middle of one!"},"text":"There was no\r\nlabel this time with the words “DRINK ME,” but nevertheless she uncorked it and put it to her lips. “I know\r\nsomething interesting is sure to happen,” she said to herself, “whenever I eat or drink anything; so I’ll just see\r\nwhat this bottle does. I do hope it’ll make me grow large again, for really I’m quite tired of being such a tiny\r\nlittle thing!”\r\nIt did so indeed, and much sooner than she had expected: before she had drunk half the bottle, she found her\r\nhead pressing against the ceiling, and had to stoop to save her neck from being broken. She hastily put down the\r\nbottle, saying to herself “That’s quite enough—I hope I shan’t grow any more—As it is, I can’t get out at the\r\ndoor—I do wish I hadn’t drunk quite so much!”\r\nAlas! it was too late to wish that! She went on growing, and growing, and very soon had to kneel down on the\r\nfloor: in another minute there was not even room for this, and she tried the effect of lying down with one elbow\r\nagainst the door, and the other arm curled round her head. Still she went on growing, and, as a last resource, she\r\nput one arm out of the window, and one foot up the chimney, and said to herself “Now I can do no more,\r\nwhatever happens. What will become of me?”\r\nLuckily for Alice, the little magic bottle had now had its full effect, and she grew no larger: still it was very\r\nuncomfortable, and, as there seemed to be no sort of chance of her ever getting out of the room again, no wonder\r\nshe felt unhappy.\r\n“It was much pleasanter at home,” thought poor Alice, “when one wasn’t always growing larger and smaller,\r\nand being ordered about by mice and rabbits. I almost wish I hadn’t gone down that rabbit-hole—and yet—and\r\nyet—it’s rather curious, you know, this sort of life! I do wonder what can have happened to me! When I used to\r\nread fairy-tales, I fancied that kind of thing never happened, and now here I am in the middle of one!","title":"AliceInWonderland.pdf","uri":"gs://rag-engine-eval-service/AliceInWonderland.pdf"}},{"retrievedContext":{"ragChunk":{"pageSpan":{"firstPage":1,"lastPage":63},"text":"“Change engines—” it\r\nsaid, and was obliged to leave off.\r\n“It sounds like a horse,” Alice thought to herself. And an extremely small voice, close to her ear, said, “You\r\nmight make a joke on that—something about ‘horse’ and ‘hoarse,’ you know.”\r\nThen a very gentle voice in the distance said, “She must be labelled ‘Lass, with care,’ you know—”\r\nAnd after that other voices went on (“What a number of people there are in the carriage!” thought Alice),\r\nsaying, “She must go by post, as she’s got a head on her—” “She must be sent as a message by the telegraph—”\r\n“She must draw the train herself the rest of the way—” and so on.\r\nBut the gentleman dressed in white paper leaned forwards and whispered in her ear, “Never mind what they all\r\nsay, my dear, but take a return-ticket every time the train stops.”\r\n“Indeed I shan’t!” Alice said rather impatiently. “I don’t belong to this railway journey at all—I was in a wood\r\njust now—and I wish I could get back there.”\r\n“You might make a joke on that,” said the little voice close to her ear: “something about ‘you would if you\r\ncould,’ you know.”\r\n“Don’t tease so,” said Alice, looking about in vain to see where the voice came from; “if you’re so anxious to\r\nhave a joke made, why don’t you make one yourself?”\r\nThe little voice sighed deeply: it was very unhappy, evidently, and Alice would have said something pitying to\r\ncomfort it, “If it would only sigh like other people!” she thought. But this was such a wonderfully small sigh,\r\nthat she wouldn’t have heard it at all, if it hadn’t come quite close to her ear. The consequence of this was that it\r\ntickled her ear very much, and quite took off her thoughts from the unhappiness of the poor little creature.\r\n“I know you are a friend,” the little voice went on; “a dear friend, and an old friend. And you won’t hurt me,\r\nthough I am an insect.”\r\n“What kind of insect?” Alice inquired a little anxiously."},"text":"“Change engines—” it\r\nsaid, and was obliged to leave off.\r\n“It sounds like a horse,” Alice thought to herself. And an extremely small voice, close to her ear, said, “You\r\nmight make a joke on that—something about ‘horse’ and ‘hoarse,’ you know.”\r\nThen a very gentle voice in the distance said, “She must be labelled ‘Lass, with care,’ you know—”\r\nAnd after that other voices went on (“What a number of people there are in the carriage!” thought Alice),\r\nsaying, “She must go by post, as she’s got a head on her—” “She must be sent as a message by the telegraph—”\r\n“She must draw the train herself the rest of the way—” and so on.\r\nBut the gentleman dressed in white paper leaned forwards and whispered in her ear, “Never mind what they all\r\nsay, my dear, but take a return-ticket every time the train stops.”\r\n“Indeed I shan’t!” Alice said rather impatiently. “I don’t belong to this railway journey at all—I was in a wood\r\njust now—and I wish I could get back there.”\r\n“You might make a joke on that,” said the little voice close to her ear: “something about ‘you would if you\r\ncould,’ you know.”\r\n“Don’t tease so,” said Alice, looking about in vain to see where the voice came from; “if you’re so anxious to\r\nhave a joke made, why don’t you make one yourself?”\r\nThe little voice sighed deeply: it was very unhappy, evidently, and Alice would have said something pitying to\r\ncomfort it, “If it would only sigh like other people!” she thought. But this was such a wonderfully small sigh,\r\nthat she wouldn’t have heard it at all, if it hadn’t come quite close to her ear. The consequence of this was that it\r\ntickled her ear very much, and quite took off her thoughts from the unhappiness of the poor little creature.\r\n“I know you are a friend,” the little voice went on; “a dear friend, and an old friend. And you won’t hurt me,\r\nthough I am an insect.”\r\n“What kind of insect?” Alice inquired a little anxiously.","title":"ThroughTheLookingGlass.pdf","uri":"gs://rag-engine-eval-service/ThroughTheLookingGlass.pdf"}}],"groundingSupports":[{"confidenceScores":[0.820656,0.7017968],"groundingChunkIndices":[0,1],"segment":{"endIndex":419,"startIndex":224,"text":"She frequently questions \"Who in the world am I?\" and expresses that she is \"not myself,\" struggling to reconcile her perception of herself with the constant changes in her size and surroundings."}},{"confidenceScores":[0.64674526],"groundingChunkIndices":[0],"segment":{"endIndex":488,"startIndex":420,"text":"This leads to confusion and difficulty explaining herself to others."}},{"confidenceScores":[0.729995],"groundingChunkIndices":[2],"segment":{"endIndex":666,"startIndex":490,"text":"Furthermore, Alice exhibits considerable internal conflict and self-reprimand, often scolding herself severely and even wishing to \"box her own ears\" for perceived wrongdoings."}},{"confidenceScores":[0.694868],"groundingChunkIndices":[1],"segment":{"endIndex":813,"startIndex":667,"text":"She also experiences intense emotional shifts, crying \"gallons of tears\" and then abruptly stopping, indicating a struggle to manage her feelings."}},{"confidenceScores":[0.8897245],"groundingChunkIndices":[2],"segment":{"endIndex":968,"startIndex":814,"text":"She expects \"nothing but out-of-the-way things to happen,\" which suggests a disconnect from typical reality and an unusual expectation of her environment."}}],"retrievalQueries":["What would a trained psychologist say is Alice's main problem?"]},"finishReason":"STOP","usageMetadata":{"cacheTokensDetails":[{"modality":"TEXT","tokenCount":150}],"cachedContentTokenCount":150,"candidatesTokenCount":182,"candidatesTokensDetails":[{"modality":"TEXT","tokenCount":182}],"promptTokenCount":160,"promptTokensDetails":[{"modality":"TEXT","tokenCount":160}],"thoughtsTokenCount":602,"totalTokenCount":944,"trafficType":"ON_DEMAND"},"avgLogprobs":-1.7889087383563702,"invocationId":"e-897d2f26-6ba1-4b76-884e-ac9fd268a387","author":"root_agent","actions":{"stateDelta":{},"artifactDelta":{},"requestedAuthConfigs":{},"requestedToolConfirmations":{}},"id":"d0686078-cebc-4913-ba6c-e1cf72f01471","timestamp":1763048321.042252}
+
+
+DEBUG: LoggingMiddleware parsed request_data: {'appName': 'rag-agent', 'userId': 'user', 'sessionId': 'ccfe4d22-0762-4e04-9d26-ac97df25411f', 'newMessage': {'role': 'user', 'parts': [{'text': "What would a trained psychologist say is Alice's main problem?"}]}, 'streaming': False, 'stateDelta': None}
+DEBUG: LoggingMiddleware triggered for prompt: What would a trained psychologist say is Alice's main problem?
+INFO:     127.0.0.1:55600 - "POST /run_sse HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/users/user/sessions/ccfe4d22-0762-4e04-9d26-ac97df25411f
+INFO:     127.0.0.1:55600 - "GET /apps/rag-agent/users/user/sessions/ccfe4d22-0762-4e04-9d26-ac97df25411f HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /debug/trace/session/ccfe4d22-0762-4e04-9d26-ac97df25411f
+INFO:     127.0.0.1:55600 - "GET /debug/trace/session/ccfe4d22-0762-4e04-9d26-ac97df25411f HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /run_sse
+DEBUG: LoggingMiddleware received body: {"appName":"rag-agent","userId":"user","sessionId":"ccfe4d22-0762-4e04-9d26-ac97df25411f","newMessage":{"role":"user","parts":[{"text":"what did Alice think of Wonderland?"}]},"streaming":false,"stateDelta":null}
+DEBUG: Raw response body: data: {"content":{"parts":[{"thoughtSignature":"CqwNAePx_14vhRPw5Q20dC8WsBUf8zQ14ff01Y4hOgqd6dFTsqY9UqjFCdMcvGFlAfqf2dt1zQ3pOBvW8rbX6g6hFy0gJcJks9BOL9d8Sohg8uaTHRq_mfNIcqDlWJthya3HhF9BqQykOz6oqLm42sDTnAadlNM2_jqMfDz7BYG0rBBNU7rPHvsrzbLwcjTKnVDANF0K90OpvZNVqDwE1VQhc0CmGmp9_dyBp2b1VmrMc9LtrfbCvL-ZRQ7ufrgfYdJeVro8JSyPHjzFiP3X1daBmJq3V6xcpMCZqadrPNaRKeU82zEBf3vevjhR8AzBLtGgsGSWA0Ifc1RsC5k5hrZn6bQENA34l_sYyG7hIbGI5kornWzY_kV1uOQnMf6UJr9yzWyrbMay9CkiWs5WrmqkmSglYUNYq6_H4a2ujt9iq4tyqg7l4ZudbhNE4yRNWnaz9uImwVQ2_rtGlJcKrclmJuEEsvNSQX4eigDHk9J9kCYTaq19Cqx7zEdVV1CZtTAP5aYg3X95dV9BJEhI5CPz5Ippavly5QY2e2Oal1s_RR71NJx523Uf0tlJ4dBHFe1OvnI803o1XFs7x-U7dFbTOW2jLZm-dcd2Sd51qHDWU4Fo9CEa-aOb1XJlDX5a9gQMzJvhyXzkPgF8SwtEeaiRgoQ_iupYZQeOdUhRhXlK45w1kFuSui9fpWovfQ0a0_dpJLFIAI-nouDiI5QHyvYxtMS2sIjqICFibrgLyhdtSHqSgVkIl_rrHmSS4kUHSs3zAMHlxo36PDCcDNtNdGKAgXRnCCqpPnjtRxSFVkxqiMVjaAhtBO8yhuliwlgSXbiaoop_aBvjfOc2EpWDNSmnjAybY8eFyTw5QHps3dnQPbYjUOvBpbscKpCQMYE7KhAhKjbC9tJOYOSqeQutTHC_BAX-RSqkKDBOZCj6m_yo6XK85OX-l5c4e7D1Bf2sOnsatcJDEOpoPqSqUntcRCdVQptSVyUWunENiwppYAqvPigvNwUbICvY31AIEP5ktcGyAo5uzo8hs0BdZl1fzgEhytgBpvdGcrpIbxEX2qfXIi4Nu4hMBbVgwo9-AEfo-vyujWnTdYTCTYKddjw6vB-YQU7GMJu06a4Sr1wIocvdVJsw1hvBC5DC_lVLa7HW1BjZFewRNSvTBQE3OIAO9mZ7n_8CzBti3i9f6LIg6t_MOJoka-J0F17xEEnsHymSkSPGsIBNVXVRtLGwHo_V-NR_0vpWkiuLTs2ETaLn1YjHI5XuOH0-0OKb8m9RQCkJPetdXIxalBddD_V8qJICKXGcITp_UEwX3HeXJ03J_M2cQaAhmFMxBrIE6KGjz6vcTiShl34Qu1V5UfFp6Ke-1n0RvK_SvRffa26awluFDFFJcO1b4UyA8O9Ff_v6q1vRPzlkF6aZtlHs8Ez5P_xgCPvgnbvjefezjMQp3bioUU7YPKwsgVO6qSwswoA9axCN2QHBbjO8LJQab2VQvhIYfXQwKIMJgpmPBeIFfdojvq61suJZqjnqEMEcCKCcR-nQa2X-Ii9_r0Qx7x9zMN-hyU3FM0WS1h1YUbZ-yPHaSJx_tW9oIDr299ZyEpUiGBDzJ3W5AVy5uTlyC-aX4jNFY64uFrPDxD9xTQGYBH-R_Hr6bt0v3YXJOx3HoJpREaP0ens0mWYPfqF6wNJaG8_viCsMPkVVt6_48AjWKiyH6GNv-O-KiBmp81Ol0U_bZLOr1Pldy0Dp7Xp5B5MjrCxQlRtOA31HWDwtndh2-IkD-DHLuw5PO_oCeTJUe6zvX07xbQ5t8FVlLki1wqi0RYjMO2zdnznCGlHxR_UTArx2t3QcUtdfLOkNxyQUyU90bjJSyZOVE1DQLyTpaAHiqL0dEmJPziAZoPMnojoMNq_rzmJUgYVIXNmdiLYAKOFkBhoPJkgQ9aaIkpQK40XrrXcyXuSPoax39wfojjWgfROZ3TDISq9KxWrfGLOcRup8Zlb-SOYCgwCEJXFpkMPyOgXUAxdfj_l8VrFPGEc7VHYAZm8f2IQF9ufcAiEa_O50Ae3WHdsE9aQ1DKA_KRP8HUAgksvJPiLFJkhO19ppA57GLVkm6b3j_wwBOJ6TZ95whr6DyqwqC49eqSceCQxyndhhDvBt3hw5Xe-3xLpl0M59_uUNhxC321Hl53ZQiGhBX4n9Od24YyogD0h625MhatftxQGFJPiFQzkJykNGx4eYZP5Y83bF95ROzTOExOTvxTw0FrQZjx40goBu6tnS6CftmLKpH7akEp8QQei8qpDLaw==","text":"Alice found Wonderland to be very confusing and curious, often expressing a sense of unease and bewilderment. She observed that the inhabitants, particularly during the croquet game, did not play fairly, quarreled dreadfully, and lacked clear rules. She also found it confusing that many things were alive. Despite wishing she hadn't come to Wonderland at times, she also found the \"sort of life\" there to be \"rather curious.\" She was wary of the Queen and even felt a need to escape."}],"role":"model"},"groundingMetadata":{"groundingChunks":[{"retrievedContext":{"ragChunk":{"pageSpan":{"firstPage":1,"lastPage":51},"text":"Alice began to feel very uneasy: to be sure, she had not as yet had any dispute with the Queen, but she knew\r\nthat it might happen any minute, “and then,” thought she, “what would become of me? They’re dreadfully fond\r\nof beheading people here; the great wonder is, that there’s any one left alive!”\r\nShe was looking about for some way of escape, and wondering whether she could get away without being\r\nseen, when she noticed a curious appearance in the air: it puzzled her very much at first, but, after watching it a\r\nminute or two, she made it out to be a grin, and she said to herself “It’s the Cheshire Cat: now I shall have\r\nsomebody to talk to.”\r\n“How are you getting on?” said the Cat, as soon as there was mouth enough for it to speak with.\r\nAlice waited till the eyes appeared, and then nodded. “It’s no use speaking to it,” she thought, “till its ears\r\nhave come, or at least one of them.” In another minute the whole head appeared, and then Alice put down her\r\nflamingo, and began an account of the game, feeling very glad she had someone to listen to her. The Cat seemed\r\nto think that there was enough of it now in sight, and no more of it appeared.\r\n“I don’t think they play at all fairly,” Alice began, in rather a complaining tone, “and they all quarrel so\r\ndreadfully one can’t hear oneself speak—and they don’t seem to have any rules in particular; at least, if there are,\r\nnobody attends to them—and you’ve no idea how confusing it is all the things being alive; for instance, there’s\r\nthe arch I’ve got to go through next walking about at the other end of the ground—and I should have croqueted\r\nthe Queen’s hedgehog just now, only it ran away when it saw mine coming!”\r\n“How do you like the Queen?” said the Cat in a low voice."},"text":"Alice began to feel very uneasy: to be sure, she had not as yet had any dispute with the Queen, but she knew\r\nthat it might happen any minute, “and then,” thought she, “what would become of me? They’re dreadfully fond\r\nof beheading people here; the great wonder is, that there’s any one left alive!”\r\nShe was looking about for some way of escape, and wondering whether she could get away without being\r\nseen, when she noticed a curious appearance in the air: it puzzled her very much at first, but, after watching it a\r\nminute or two, she made it out to be a grin, and she said to herself “It’s the Cheshire Cat: now I shall have\r\nsomebody to talk to.”\r\n“How are you getting on?” said the Cat, as soon as there was mouth enough for it to speak with.\r\nAlice waited till the eyes appeared, and then nodded. “It’s no use speaking to it,” she thought, “till its ears\r\nhave come, or at least one of them.” In another minute the whole head appeared, and then Alice put down her\r\nflamingo, and began an account of the game, feeling very glad she had someone to listen to her. The Cat seemed\r\nto think that there was enough of it now in sight, and no more of it appeared.\r\n“I don’t think they play at all fairly,” Alice began, in rather a complaining tone, “and they all quarrel so\r\ndreadfully one can’t hear oneself speak—and they don’t seem to have any rules in particular; at least, if there are,\r\nnobody attends to them—and you’ve no idea how confusing it is all the things being alive; for instance, there’s\r\nthe arch I’ve got to go through next walking about at the other end of the ground—and I should have croqueted\r\nthe Queen’s hedgehog just now, only it ran away when it saw mine coming!”\r\n“How do you like the Queen?” said the Cat in a low voice.","title":"AliceInWonderland.pdf","uri":"gs://rag-engine-eval-service/AliceInWonderland.pdf"}},{"retrievedContext":{"ragChunk":{"pageSpan":{"firstPage":1,"lastPage":51},"text":"So she set to work, and very soon finished off the cake.\r\n* * * * * * *\r\n* * * * * *\r\n* * * * * * *\r\n3/11/25, 9:27 AM Alice’s Adventures in Wonderland | Project Gutenberg\r\nhttps://www.gutenberg.org/cache/epub/11/pg11-images.html 6/51CHAPTER II.\r\nThe Pool of Tears\r\n“Curiouser and curiouser!” cried Alice (she was so much surprised, that for the moment she quite forgot how\r\nto speak good English); “now I’m opening out like the largest telescope that ever was! Good-bye, feet!” (for\r\nwhen she looked down at her feet, they seemed to be almost out of sight, they were getting so far off). “Oh, my\r\npoor little feet, I wonder who will put on your shoes and stockings for you now, dears? I’m sure I shan’t be able!\r\nI shall be a great deal too far off to trouble myself about you: you must manage the best way you can;—but I\r\nmust be kind to them,” thought Alice, “or perhaps they won’t walk the way I want to go! Let me see: I’ll give\r\nthem a new pair of boots every Christmas.”\r\nAnd she went on planning to herself how she would manage it. “They must go by the carrier,” she thought;\r\n“and how funny it’ll seem, sending presents to one’s own feet! And how odd the directions will look!\r\n Alice’s Right Foot, Esq.,\r\n Hearthrug,\r\n near the Fender,\r\n (with Alice’s love).\r\nOh dear, what nonsense I’m talking!”\r\nJust then her head struck against the roof of the hall: in fact she was now more than nine feet high, and she at\r\nonce took up the little golden key and hurried off to the garden door.\r\nPoor Alice! It was as much as she could do, lying down on one side, to look through into the garden with one\r\neye; but to get through was more hopeless than ever: she sat down and began to cry again.\r\n“You ought to be ashamed of yourself,” said Alice, “a great girl like you,” (she might well say this), “to go on\r\ncrying in this way!"},"text":"So she set to work, and very soon finished off the cake.\r\n* * * * * * *\r\n* * * * * *\r\n* * * * * * *\r\n3/11/25, 9:27 AM Alice’s Adventures in Wonderland | Project Gutenberg\r\nhttps://www.gutenberg.org/cache/epub/11/pg11-images.html 6/51CHAPTER II.\r\nThe Pool of Tears\r\n“Curiouser and curiouser!” cried Alice (she was so much surprised, that for the moment she quite forgot how\r\nto speak good English); “now I’m opening out like the largest telescope that ever was! Good-bye, feet!” (for\r\nwhen she looked down at her feet, they seemed to be almost out of sight, they were getting so far off). “Oh, my\r\npoor little feet, I wonder who will put on your shoes and stockings for you now, dears? I’m sure I shan’t be able!\r\nI shall be a great deal too far off to trouble myself about you: you must manage the best way you can;—but I\r\nmust be kind to them,” thought Alice, “or perhaps they won’t walk the way I want to go! Let me see: I’ll give\r\nthem a new pair of boots every Christmas.”\r\nAnd she went on planning to herself how she would manage it. “They must go by the carrier,” she thought;\r\n“and how funny it’ll seem, sending presents to one’s own feet! And how odd the directions will look!\r\n Alice’s Right Foot, Esq.,\r\n Hearthrug,\r\n near the Fender,\r\n (with Alice’s love).\r\nOh dear, what nonsense I’m talking!”\r\nJust then her head struck against the roof of the hall: in fact she was now more than nine feet high, and she at\r\nonce took up the little golden key and hurried off to the garden door.\r\nPoor Alice! It was as much as she could do, lying down on one side, to look through into the garden with one\r\neye; but to get through was more hopeless than ever: she sat down and began to cry again.\r\n“You ought to be ashamed of yourself,” said Alice, “a great girl like you,” (she might well say this), “to go on\r\ncrying in this way!","title":"AliceInWonderland.pdf","uri":"gs://rag-engine-eval-service/AliceInWonderland.pdf"}},{"retrievedContext":{"ragChunk":{"pageSpan":{"firstPage":1,"lastPage":63},"text":"“I don’t know what you mean by your way,” said the Queen: “all the ways about here belong to me—but why\r\ndid you come out here at all?” she added in a kinder tone. “Curtsey while you’re thinking what to say, it saves\r\ntime.”\r\nAlice wondered a little at this, but she was too much in awe of the Queen to disbelieve it. “I’ll try it when I go\r\nhome,” she thought to herself, “the next time I’m a little late for dinner.”\r\n“It’s time for you to answer now,” the Queen said, looking at her watch: “open your mouth a little wider when\r\nyou speak, and always say ‘your Majesty.’”\r\n“I only wanted to see what the garden was like, your Majesty—”\r\n“That’s right,” said the Queen, patting her on the head, which Alice didn’t like at all, “though, when you say\r\n‘garden,’—I’ve seen gardens, compared with which this would be a wilderness.”\r\nAlice didn’t dare to argue the point, but went on: “—and I thought I’d try and find my way to the top of that\r\nhill—”\r\n“When you say ‘hill,’” the Queen interrupted, “I could show you hills, in comparison with which you’d call\r\nthat a valley.”\r\n“No, I shouldn’t,” said Alice, surprised into contradicting her at last: “a hill can’t be a valley, you know. That\r\nwould be nonsense—”\r\nThe Red Queen shook her head, “You may call it ‘nonsense’ if you like,” she said, “but I’ve heard nonsense,\r\ncompared with which that would be as sensible as a dictionary!”\r\nAlice curtseyed again, as she was afraid from the Queen’s tone that she was a little offended: and they walked\r\non in silence till they got to the top of the little hill.\r\nFor some minutes Alice stood without speaking, looking out in all directions over the country—and a most\r\ncurious country it was. There were a number of tiny little brooks running straight across it from side to side, and\r\nthe ground between was divided up into squares by a number of little green hedges, that reached from brook to\r\nbrook."},"text":"“I don’t know what you mean by your way,” said the Queen: “all the ways about here belong to me—but why\r\ndid you come out here at all?” she added in a kinder tone. “Curtsey while you’re thinking what to say, it saves\r\ntime.”\r\nAlice wondered a little at this, but she was too much in awe of the Queen to disbelieve it. “I’ll try it when I go\r\nhome,” she thought to herself, “the next time I’m a little late for dinner.”\r\n“It’s time for you to answer now,” the Queen said, looking at her watch: “open your mouth a little wider when\r\nyou speak, and always say ‘your Majesty.’”\r\n“I only wanted to see what the garden was like, your Majesty—”\r\n“That’s right,” said the Queen, patting her on the head, which Alice didn’t like at all, “though, when you say\r\n‘garden,’—I’ve seen gardens, compared with which this would be a wilderness.”\r\nAlice didn’t dare to argue the point, but went on: “—and I thought I’d try and find my way to the top of that\r\nhill—”\r\n“When you say ‘hill,’” the Queen interrupted, “I could show you hills, in comparison with which you’d call\r\nthat a valley.”\r\n“No, I shouldn’t,” said Alice, surprised into contradicting her at last: “a hill can’t be a valley, you know. That\r\nwould be nonsense—”\r\nThe Red Queen shook her head, “You may call it ‘nonsense’ if you like,” she said, “but I’ve heard nonsense,\r\ncompared with which that would be as sensible as a dictionary!”\r\nAlice curtseyed again, as she was afraid from the Queen’s tone that she was a little offended: and they walked\r\non in silence till they got to the top of the little hill.\r\nFor some minutes Alice stood without speaking, looking out in all directions over the country—and a most\r\ncurious country it was. There were a number of tiny little brooks running straight across it from side to side, and\r\nthe ground between was divided up into squares by a number of little green hedges, that reached from brook to\r\nbrook.","title":"ThroughTheLookingGlass.pdf","uri":"gs://rag-engine-eval-service/ThroughTheLookingGlass.pdf"}},{"retrievedContext":{"ragChunk":{"pageSpan":{"firstPage":1,"lastPage":51},"text":"I almost wish I hadn’t gone down that rabbit-hole—and yet—and\r\nyet—it’s rather curious, you know, this sort of life! I do wonder what can have happened to me! When I used to\r\nread fairy-tales, I fancied that kind of thing never happened, and now here I am in the middle of one! There\r\n3/11/25, 9:27 AM Alice’s Adventures in Wonderland | Project Gutenberg\r\nhttps://www.gutenberg.org/cache/epub/11/pg11-images.html 13/51ought to be a book written about me, that there ought! And when I grow up, I’ll write one—but I’m grown up\r\nnow,” she added in a sorrowful tone; “at least there’s no room to grow up any more here.”\r\n“But then,” thought Alice, “shall I never get any older than I am now? That’ll be a comfort, one way—never\r\nto be an old woman—but then—always to have lessons to learn! Oh, I shouldn’t like that!”\r\n“Oh, you foolish Alice!” she answered herself. “How can you learn lessons in here? Why, there’s hardly room\r\nfor you, and no room at all for any lesson-books!”\r\nAnd so she went on, taking first one side and then the other, and making quite a conversation of it altogether;\r\nbut after a few minutes she heard a voice outside, and stopped to listen.\r\n“Mary Ann! Mary Ann!” said the voice. “Fetch me my gloves this moment!” Then came a little pattering of\r\nfeet on the stairs. Alice knew it was the Rabbit coming to look for her, and she trembled till she shook the house,\r\nquite forgetting that she was now about a thousand times as large as the Rabbit, and had no reason to be afraid of\r\nit.\r\nPresently the Rabbit came up to the door, and tried to open it; but, as the door opened inwards, and Alice’s\r\nelbow was pressed hard against it, that attempt proved a failure."},"text":"I almost wish I hadn’t gone down that rabbit-hole—and yet—and\r\nyet—it’s rather curious, you know, this sort of life! I do wonder what can have happened to me! When I used to\r\nread fairy-tales, I fancied that kind of thing never happened, and now here I am in the middle of one! There\r\n3/11/25, 9:27 AM Alice’s Adventures in Wonderland | Project Gutenberg\r\nhttps://www.gutenberg.org/cache/epub/11/pg11-images.html 13/51ought to be a book written about me, that there ought! And when I grow up, I’ll write one—but I’m grown up\r\nnow,” she added in a sorrowful tone; “at least there’s no room to grow up any more here.”\r\n“But then,” thought Alice, “shall I never get any older than I am now? That’ll be a comfort, one way—never\r\nto be an old woman—but then—always to have lessons to learn! Oh, I shouldn’t like that!”\r\n“Oh, you foolish Alice!” she answered herself. “How can you learn lessons in here? Why, there’s hardly room\r\nfor you, and no room at all for any lesson-books!”\r\nAnd so she went on, taking first one side and then the other, and making quite a conversation of it altogether;\r\nbut after a few minutes she heard a voice outside, and stopped to listen.\r\n“Mary Ann! Mary Ann!” said the voice. “Fetch me my gloves this moment!” Then came a little pattering of\r\nfeet on the stairs. Alice knew it was the Rabbit coming to look for her, and she trembled till she shook the house,\r\nquite forgetting that she was now about a thousand times as large as the Rabbit, and had no reason to be afraid of\r\nit.\r\nPresently the Rabbit came up to the door, and tried to open it; but, as the door opened inwards, and Alice’s\r\nelbow was pressed hard against it, that attempt proved a failure.","title":"AliceInWonderland.pdf","uri":"gs://rag-engine-eval-service/AliceInWonderland.pdf"}},{"retrievedContext":{"ragChunk":{"pageSpan":{"firstPage":1,"lastPage":51},"text":"However, this bottle was not marked “poison,” so Alice ventured to taste it, and finding it very nice, (it had, in\r\nfact, a sort of mixed flavour of cherry-tart, custard, pine-apple, roast turkey, toffee, and hot buttered toast,) she\r\nvery soon finished it off.\r\n* * * * * * *\r\n* * * * * *\r\n* * * * * * *\r\n“What a curious feeling!” said Alice; “I must be shutting up like a telescope.”\r\n3/11/25, 9:27 AM Alice’s Adventures in Wonderland | Project Gutenberg\r\nhttps://www.gutenberg.org/cache/epub/11/pg11-images.html 5/51And so it was indeed: she was now only ten inches high, and her face brightened up at the thought that she\r\nwas now the right size for going through the little door into that lovely garden. First, however, she waited for a\r\nfew minutes to see if she was going to shrink any further: she felt a little nervous about this; “for it might end,\r\nyou know,” said Alice to herself, “in my going out altogether, like a candle. I wonder what I should be like\r\nthen?” And she tried to fancy what the flame of a candle is like after the candle is blown out, for she could not\r\nremember ever having seen such a thing.\r\nAfter a while, finding that nothing more happened, she decided on going into the garden at once; but, alas for\r\npoor Alice! when she got to the door, she found she had forgotten the little golden key, and when she went back\r\nto the table for it, she found she could not possibly reach it: she could see it quite plainly through the glass, and\r\nshe tried her best to climb up one of the legs of the table, but it was too slippery; and when she had tired herself\r\nout with trying, the poor little thing sat down and cried."},"text":"However, this bottle was not marked “poison,” so Alice ventured to taste it, and finding it very nice, (it had, in\r\nfact, a sort of mixed flavour of cherry-tart, custard, pine-apple, roast turkey, toffee, and hot buttered toast,) she\r\nvery soon finished it off.\r\n* * * * * * *\r\n* * * * * *\r\n* * * * * * *\r\n“What a curious feeling!” said Alice; “I must be shutting up like a telescope.”\r\n3/11/25, 9:27 AM Alice’s Adventures in Wonderland | Project Gutenberg\r\nhttps://www.gutenberg.org/cache/epub/11/pg11-images.html 5/51And so it was indeed: she was now only ten inches high, and her face brightened up at the thought that she\r\nwas now the right size for going through the little door into that lovely garden. First, however, she waited for a\r\nfew minutes to see if she was going to shrink any further: she felt a little nervous about this; “for it might end,\r\nyou know,” said Alice to herself, “in my going out altogether, like a candle. I wonder what I should be like\r\nthen?” And she tried to fancy what the flame of a candle is like after the candle is blown out, for she could not\r\nremember ever having seen such a thing.\r\nAfter a while, finding that nothing more happened, she decided on going into the garden at once; but, alas for\r\npoor Alice! when she got to the door, she found she had forgotten the little golden key, and when she went back\r\nto the table for it, she found she could not possibly reach it: she could see it quite plainly through the glass, and\r\nshe tried her best to climb up one of the legs of the table, but it was too slippery; and when she had tired herself\r\nout with trying, the poor little thing sat down and cried.","title":"AliceInWonderland.pdf","uri":"gs://rag-engine-eval-service/AliceInWonderland.pdf"}}],"groundingSupports":[{"confidenceScores":[0.7364719],"groundingChunkIndices":[0],"segment":{"endIndex":249,"startIndex":110,"text":"She observed that the inhabitants, particularly during the croquet game, did not play fairly, quarreled dreadfully, and lacked clear rules."}}],"retrievalQueries":["What did Alice think of Wonderland?"]},"finishReason":"STOP","usageMetadata":{"candidatesTokenCount":102,"candidatesTokensDetails":[{"modality":"TEXT","tokenCount":102}],"promptTokenCount":349,"promptTokensDetails":[{"modality":"TEXT","tokenCount":949}],"thoughtsTokenCount":449,"totalTokenCount":900,"trafficType":"ON_DEMAND"},"avgLogprobs":-1.9426938225241268,"invocationId":"e-e6c02537-0c3b-4555-abc9-c95d5555b298","author":"root_agent","actions":{"stateDelta":{},"artifactDelta":{},"requestedAuthConfigs":{},"requestedToolConfirmations":{}},"id":"d3a4011c-2388-40e8-9f5c-3a0e99623fc4","timestamp":1763048330.806379}
+
+
+DEBUG: LoggingMiddleware parsed request_data: {'appName': 'rag-agent', 'userId': 'user', 'sessionId': 'ccfe4d22-0762-4e04-9d26-ac97df25411f', 'newMessage': {'role': 'user', 'parts': [{'text': 'what did Alice think of Wonderland?'}]}, 'streaming': False, 'stateDelta': None}
+DEBUG: LoggingMiddleware triggered for prompt: what did Alice think of Wonderland?
+INFO:     127.0.0.1:55600 - "POST /run_sse HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/users/user/sessions/ccfe4d22-0762-4e04-9d26-ac97df25411f
+INFO:     127.0.0.1:55600 - "GET /apps/rag-agent/users/user/sessions/ccfe4d22-0762-4e04-9d26-ac97df25411f HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /debug/trace/session/ccfe4d22-0762-4e04-9d26-ac97df25411f
+INFO:     127.0.0.1:55600 - "GET /debug/trace/session/ccfe4d22-0762-4e04-9d26-ac97df25411f HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/eval_sets/evalset11ce78
+INFO:     127.0.0.1:38422 - "POST /apps/rag-agent/eval_sets/evalset11ce78 HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/eval_sets
+INFO:     127.0.0.1:38422 - "GET /apps/rag-agent/eval_sets HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/eval_sets/evalset224918/evals
+INFO:     127.0.0.1:38422 - "GET /apps/rag-agent/eval_sets/evalset224918/evals HTTP/1.1" 200 OK
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/evaluation/metric_evaluator_registry.py:90: UserWarning: [EXPERIMENTAL] MetricEvaluatorRegistry: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  metric_evaluator_registry = MetricEvaluatorRegistry()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/adk_web_server.py:1096: UserWarning: [EXPERIMENTAL] LocalEvalService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  eval_service = LocalEvalService(
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/eval_sets/evalset224918/run_eval
+INFO:     127.0.0.1:38422 - "POST /apps/rag-agent/eval_sets/evalset224918/run_eval HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/eval_results
+INFO:     127.0.0.1:38422 - "GET /apps/rag-agent/eval_results HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/eval_results/rag-agent_evalset575c19_1763002942.1069586
+INFO:     127.0.0.1:38422 - "GET /apps/rag-agent/eval_results/rag-agent_evalset575c19_1763002942.1069586 HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/eval_results/rag-agent_evalsetc7f6ab_1763000111.6119924
+INFO:     127.0.0.1:38422 - "GET /apps/rag-agent/eval_results/rag-agent_evalsetc7f6ab_1763000111.6119924 HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/eval_results/rag-agent_evalsetf4729c_1763003476.1903408
+INFO:     127.0.0.1:38422 - "GET /apps/rag-agent/eval_results/rag-agent_evalsetf4729c_1763003476.1903408 HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/eval_results/rag-agent_evalsetf4729c_1763046957.09863
+INFO:     127.0.0.1:38422 - "GET /apps/rag-agent/eval_results/rag-agent_evalsetf4729c_1763046957.09863 HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/eval_results/rag-agent_evalset224918_1763048398.1998448
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/eval_results/rag-agent_evalsetf4729c_1763042738.2239141
+INFO:     127.0.0.1:36538 - "GET /apps/rag-agent/eval_results/rag-agent_evalset224918_1763048398.1998448 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36548 - "GET /apps/rag-agent/eval_results/rag-agent_evalsetf4729c_1763042738.2239141 HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/eval_results/rag-agent_evalset67e765_1762989747.6606655
+INFO:     127.0.0.1:36538 - "GET /apps/rag-agent/eval_results/rag-agent_evalset67e765_1762989747.6606655 HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/eval_results/rag-agent_evalsetf4729c_1763041851.9506958
+INFO:     127.0.0.1:38422 - "GET /apps/rag-agent/eval_results/rag-agent_evalsetf4729c_1763041851.9506958 HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/eval_results/rag-agent_evalsetf4729c_1763043180.7081888
+INFO:     127.0.0.1:36538 - "GET /apps/rag-agent/eval_results/rag-agent_evalsetf4729c_1763043180.7081888 HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/eval_results/rag-agent_evalsetf4729c_1763043288.5261562
+INFO:     127.0.0.1:36538 - "GET /apps/rag-agent/eval_results/rag-agent_evalsetf4729c_1763043288.5261562 HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/eval_results/rag-agent_evalset224918_1763047909.0047631
+INFO:     127.0.0.1:36548 - "GET /apps/rag-agent/eval_results/rag-agent_evalset224918_1763047909.0047631 HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /apps/rag-agent/users/user/sessions/ccfe4d22-0762-4e04-9d26-ac97df25411f
+INFO:     127.0.0.1:34782 - "GET /apps/rag-agent/users/user/sessions/ccfe4d22-0762-4e04-9d26-ac97df25411f HTTP/1.1" 200 OK
+DEBUG: LoggingMiddleware entered for path: /debug/trace/session/ccfe4d22-0762-4e04-9d26-ac97df25411f
+INFO:     127.0.0.1:34782 - "GET /debug/trace/session/ccfe4d22-0762-4e04-9d26-ac97df25411f HTTP/1.1" 200 OK
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [13079]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [15778]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [15778]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [16409]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [16409]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [17412]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [17412]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [20047]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [20047]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [20114]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [20114]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [20210]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [20210]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [21499]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [21499]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [21606]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [21606]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [22052]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [22052]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [22575]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [22575]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [23122]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/run_adk_web_with_logging.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [23122]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [23760]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/run_adk_web_with_logging.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [23760]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [24472]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [24472]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [25125]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [25125]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [25229]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [25229]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [25696]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [25696]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [26060]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [26060]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [27566]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [27566]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [27711]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [27711]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [28343]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [28343]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [29408]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [29408]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [29879]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [29879]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [29981]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [29981]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [30190]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [30190]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [30414]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [30414]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [30709]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [30709]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [31018]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [31018]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [31207]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [31207]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [31908]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [31908]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [32532]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [32532]
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+--- Using PROJECT_ID: kallogjeri-project-345114 ---
+--- Using LOG_NAME: gemini_playground_log ---
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/cli/fast_api.py:179: UserWarning: [EXPERIMENTAL] InMemoryCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  credential_service = InMemoryCredentialService()
+/home/user/gemini_playground/.venv/python3.12/lib/python3.12/site-packages/google/adk/auth/credential_service/in_memory_credential_service.py:33: UserWarning: [EXPERIMENTAL] BaseCredentialService: This feature is experimental and may change or be removed in future versions without notice. It may introduce breaking changes at any time.
+  super().__init__()
+Overriding of current TracerProvider is not allowed
+INFO:     Started server process [32987]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in '.scripts/eval_agent.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+Waiting up to 5 seconds.
+Sent all pending logs.
+INFO:root:CloudLoggingHandler closed in worker process.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [32987]

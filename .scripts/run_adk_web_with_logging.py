@@ -11,6 +11,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'a
 import google.auth
 from starlette.middleware.base import BaseHTTPMiddleware
 import json
+import google.cloud.logging
+
 # --- Configuration & Custom Logger ---
 PROJECT_ID = os.environ.get("PROJECT_ID")
 if not PROJECT_ID:
@@ -19,8 +21,11 @@ if not PROJECT_ID:
 if not PROJECT_ID:
     raise ValueError("Could not determine GCP project ID.")
 
+print(f"--- Using PROJECT_ID: {PROJECT_ID} ---")
+
 LOCATION = os.environ.get("REGION", "us-central1")
 SHORT_LOG_NAME = os.environ.get("LOG_NAME", "run_gemini_from_file")
+print(f"--- Using LOG_NAME: {SHORT_LOG_NAME} ---")
 from starlette.requests import Request
 
 class LoggingMiddleware(BaseHTTPMiddleware):
@@ -35,17 +40,71 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             # Let the request proceed to get the response
             response = await call_next(request)
             
+            # Read response body
+            response_body = b""
+            async for chunk in response.body_iterator:
+                response_body += chunk
+            print(f"DEBUG: Raw response body: {response_body.decode()}") # Added debug print
+
+            # Recreate response to send to client
+            from starlette.responses import Response
+            response = Response(content=response_body, status_code=response.status_code, headers=dict(response.headers), media_type=response.media_type)
+
             # Now, log the relevant information
             try:
                 request_data = json.loads(body)
                 print(f"DEBUG: LoggingMiddleware parsed request_data: {request_data}")
                 prompt = request_data.get("newMessage", {}).get("parts", [{}])[0].get("text", "")
+                session_id = request_data.get('sessionId')
+                user_id = request_data.get('userId')
+
+                cloud_logger = request.app.state.cloud_logger # Access the logger from app.state
+
                 if prompt:
                     print(f"DEBUG: LoggingMiddleware triggered for prompt: {prompt}")
-                    python_logging.info("ADK Web Log: Middleware triggered for prompt: %s" % prompt, extra={'json_fields': {'prompt': prompt, 'session_id': request_data.get('sessionId'), 'user_id': request_data.get('userId'), 'request_id': request_data.get('sessionId'), 'log_type': 'user_message'}})
-            except (json.JSONDecodeError, KeyError):
-                # Ignore if body is not JSON or doesn't have the expected structure.
-                print(f"DEBUG: LoggingMiddleware: Failed to parse JSON body or find 'prompt' for path: {request.url.path}")
+                    cloud_logger.log_struct(
+                        {
+                            'prompt': prompt,
+                            'session_id': session_id,
+                            'user_id': user_id,
+                            'request_id': session_id,
+                            'log_type': 'user_message'
+                        },
+                        severity='INFO'
+                    )
+
+                # Log agent's final answer
+                # Strip "data: " prefix if present, as it's not valid JSON
+                response_str = response_body.decode()
+                if response_str.startswith("data: "):
+                    response_str = response_str[len("data: "):]
+                
+                response_data = json.loads(response_str)
+                agent_response_text = ""
+                # Assuming the response structure from ADK's /run_sse or /invoke endpoint
+                # This might need adjustment based on actual ADK response format
+                if "events" in response_data:
+                    for event in response_data["events"]:
+                        if event.get("isFinalResponse"):
+                            agent_response_text = event.get("content", {}).get("parts", [{}])[0].get("text", "")
+                            break
+                elif "content" in response_data: # For /invoke endpoint directly
+                    agent_response_text = response_data.get("content", {}).get("parts", [{}])[0].get("text", "")
+
+                if agent_response_text:
+                    cloud_logger.log_struct(
+                        {
+                            'final_answer': agent_response_text,
+                            'session_id': session_id,
+                            'user_id': user_id,
+                            'request_id': session_id,
+                            'log_type': 'final_answer'
+                        },
+                        severity='INFO'
+                    )
+
+            except (json.JSONDecodeError, KeyError) as e:
+                print(f"DEBUG: LoggingMiddleware: Failed to parse JSON body or find data: {e}")
                 pass
             return response
         else:
@@ -71,7 +130,11 @@ async def lifespan(app: FastAPI):
 
     if current_project_id:
         client = google_cloud_logging.Client(project=current_project_id)
-        cloud_handler = CloudLoggingHandler(client=client, name=SHORT_LOG_NAME) # Use CloudLoggingHandler
+        app.state.cloud_logging_client = client # Store client in app.state
+        app.state.cloud_logger = client.logger(SHORT_LOG_NAME) # Store logger in app.state
+        
+        # Keep the python_logging handler for other internal logs if needed, but it won't be used by middleware
+        cloud_handler = CloudLoggingHandler(client=client, name=SHORT_LOG_NAME)
         root_logger = python_logging.getLogger()
         root_logger.addHandler(cloud_handler)
         root_logger.setLevel(python_logging.DEBUG)

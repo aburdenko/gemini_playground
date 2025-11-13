@@ -67,7 +67,7 @@ def save_current_timestamp():
     with open(TIMESTAMP_FILE, "w") as f:
         f.write(datetime.utcnow().isoformat() + "Z")
 
-def get_logs_for_evaluation(last_run_timestamp: str | None) -> tuple[pd.DataFrame | None, pd.DataFrame | None]:
+def get_logs_for_evaluation(last_run_timestamp: str | None, filter_session_id: str | None = None) -> tuple[pd.DataFrame | None, pd.DataFrame | None]:
     logging_client = logging.Client(project=PROJECT_ID)
     base_filter = (
         f'logName="{LOG_NAME}" AND '
@@ -78,50 +78,118 @@ def get_logs_for_evaluation(last_run_timestamp: str | None) -> tuple[pd.DataFram
     else:
         log_filter = base_filter
 
-    agent_sessions = {}
-    simple_logs = []
+    agent_sessions_raw_logs = {} # To store raw log entries for agent sessions
+    simple_sessions_raw_logs = {} # To store raw log entries for simple ADK web logs
+
     for entry in logging_client.list_entries(filter_=log_filter):
         payload = {} # Initialize payload as empty dict
-        if hasattr(entry, 'json_payload'):
+        if hasattr(entry, 'payload') and isinstance(entry.payload, dict):
+            payload = entry.payload
+        elif hasattr(entry, 'payload') and isinstance(entry.payload, str):
+            payload = {"message": entry.payload}
+        elif hasattr(entry, 'json_payload'): # Fallback for older versions or different entry types
             payload = entry.json_payload
-        elif hasattr(entry, 'text_payload'):
-            # For text payloads, we can put the text into a 'message' field
+        elif hasattr(entry, 'text_payload'): # Fallback for older versions or different entry types
             payload = {"message": entry.text_payload}
         else:
-            # Fallback for other types of payloads
             payload = {"message": "Unsupported log entry type"}
-        if "session_id" in payload:
+        
+        session_id = payload.get("session_id")
+        request_id = payload.get("request_id")
+
+        # Filter by session_id if provided
+        if filter_session_id and session_id != filter_session_id and request_id != filter_session_id:
+            continue
+
+        if payload.get("log_type") in ["user_message", "final_answer"]:
             session_id = payload.get("session_id")
-            if session_id not in agent_sessions:
-                agent_sessions[session_id] = {
-                    "logs": [], "instruction": payload.get("instruction"),
-                    "initial_prompt": payload.get("initial_prompt"),
-                    "ground_truth": payload.get("ground_truth"), "final_answer": ""
-                }
-            agent_sessions[session_id]["logs"].append(payload)
-            if payload.get("log_type") == "final_answer":
-                agent_sessions[session_id]["final_answer"] = payload.get("final_answer")
-        elif "request_id" in payload:
-            if all(k in payload for k in ['prompt', 'response']):
-                simple_logs.append({
-                    "prompt": payload['prompt'], "response": payload['response'],
-                    "reference": payload.get('ground_truth') or ''
+            if session_id:
+                if session_id not in agent_sessions_raw_logs:
+                    agent_sessions_raw_logs[session_id] = []
+                agent_sessions_raw_logs[session_id].append({"entry": entry, "payload": payload})
+        elif request_id and "prompt" in payload and "response" in payload:
+            # This is a simple ADK web log, identified by prompt/response and absence of specific log_type
+            if request_id not in simple_sessions_raw_logs:
+                simple_sessions_raw_logs[request_id] = []
+            simple_sessions_raw_logs[request_id].append({"entry": entry, "payload": payload})
+
+    agent_sessions_data = [] # To store aggregated and processed data for agent sessions
+    simple_sessions_data = [] # To store aggregated and processed data for simple sessions
+
+    # Process agent sessions
+    for session_id, raw_logs in agent_sessions_raw_logs.items():
+        current_user_content = ""
+        current_agent_response = ""
+        current_reference = ""
+        current_eval_id = ""
+        turn_counter = 0
+        
+        # Sort logs by timestamp to process them in order
+        sorted_raw_logs = sorted(raw_logs, key=lambda x: x["entry"].timestamp)
+
+        # Iterate through logs to find the user_message and final_answer
+        for log_item in sorted_raw_logs:
+            entry = log_item["entry"]
+            payload = log_item["payload"]
+
+            if payload.get("log_type") == "user_message":
+                current_user_content = payload.get("prompt") or payload.get("message", "").replace("ADK Web Log: Middleware triggered for prompt: ", "")
+                current_eval_id = f"{session_id}-{turn_counter}"
+            elif payload.get("log_type") == "final_answer":
+                current_agent_response = payload.get("final_answer")
+                current_reference = payload.get("ground_truth")
+                current_eval_id = f"{session_id}-{turn_counter}"
+            
+            # If we have both user content and an agent response, it's a complete turn
+            if current_user_content and current_agent_response:
+                agent_sessions_data.append({
+                    "eval_id": current_eval_id,
+                    "session_id": session_id,
+                    "user_content": current_user_content,
+                    "agent_response": current_agent_response,
+                    "reference": current_reference,
+                    "metric_type": "", # Will be populated later if evaluation runs
+                    "metric_value": "" # Will be populated later if evaluation runs
                 })
-    agent_df = None
-    if agent_sessions:
-        agent_eval_data = []
-        for session_id, data in agent_sessions.items():
-            sorted_logs = sorted(data["logs"], key=lambda x: x.get("step", 0))
-            full_trace = "\n".join([json.dumps(log) for log in sorted_logs])
-            agent_eval_data.append({
-                "instruction": data["instruction"], "initial_prompt": data["initial_prompt"],
-                "full_trace": full_trace, "final_answer": data["final_answer"],
-                "reference": data["ground_truth"],
+                # Reset for the next turn
+                current_user_content = ""
+                current_agent_response = ""
+                current_reference = ""
+                current_eval_id = ""
+                turn_counter += 1
+    
+    # Process simple sessions
+    for request_id, raw_logs in simple_sessions_raw_logs.items():
+        prompt = ""
+        response = ""
+        reference = ""
+        
+        # Sort logs by timestamp to process them in order
+        sorted_raw_logs = sorted(raw_logs, key=lambda x: x["entry"].timestamp)
+
+        for log_item in sorted_raw_logs:
+            payload = log_item["payload"]
+            if "prompt" in payload:
+                prompt = payload["prompt"]
+            if "response" in payload:
+                response = payload["response"]
+            if "ground_truth" in payload:
+                reference = payload["ground_truth"]
+        
+        if prompt and response:
+            simple_sessions_data.append({
+                "eval_id": request_id, # Use request_id as eval_id for simple logs
+                "session_id": request_id, # Use request_id as session_id for simple logs
+                "user_content": prompt,
+                "agent_response": response,
+                "reference": reference,
+                "metric_type": "simple", # Mark as simple for specific handling
+                "metric_value": ""
             })
-        agent_df = pd.DataFrame(agent_eval_data)
-    simple_df = None
-    if simple_logs:
-        simple_df = pd.DataFrame(simple_logs)
+
+    agent_df = pd.DataFrame(agent_sessions_data) if agent_sessions_data else None
+    simple_df = pd.DataFrame(simple_sessions_data) if simple_sessions_data else None
+
     return agent_df, simple_df
 
 def export_sessions_to_evalset(last_run_timestamp: str | None):
@@ -129,138 +197,87 @@ def export_sessions_to_evalset(last_run_timestamp: str | None):
     Fetches agent logs and exports each session to a separate .evalset.json file.
     """
     print("Fetching logs from Cloud Logging to export as eval sets...")
-    logging_client = logging.Client(project=PROJECT_ID)
-    # Broaden filter to get both agent sessions (with session_id) and simple ADK web logs (with request_id).
-    base_filter = f'logName="{LOG_NAME}" AND (jsonPayload.session_id:* OR jsonPayload.request_id:*)'
-    if last_run_timestamp:
-        log_filter = f'{base_filter} AND timestamp >= "{last_run_timestamp}"'
-    else:
-        log_filter = base_filter
+    
+    agent_df, simple_df = get_logs_for_evaluation(last_run_timestamp)
 
-    # 1. Group logs by session_id and request_id
-    sessions = {}
-    simple_sessions = {}
-    for entry in logging_client.list_entries(filter_=log_filter):
-        payload = {}  # Initialize payload as empty dict
-        if isinstance(entry.payload, dict):
-            payload = entry.payload
-        elif isinstance(entry.payload, str):
-            payload = {"message": entry.payload}
-        else:
-            payload = {"message": "Unsupported log entry type"}
-
-        if "session_id" in payload:
-            session_id = payload.get("session_id")
-            if session_id not in sessions:
-                sessions[session_id] = []
-            sessions[session_id].append(payload)
-        elif "request_id" in payload:
-            request_id = payload.get("request_id")
-            if request_id not in simple_sessions:
-                simple_sessions[request_id] = []
-            simple_sessions[request_id].append(payload)
-
-    if not sessions and not simple_sessions:
+    if (agent_df is None or agent_df.empty) and (simple_df is None or simple_df.empty):
         print("No new logs found to export.")
         return
 
     output_dir = os.path.join(os.path.dirname(__file__), '..', 'agents', 'rag-agent', 'eval_sets')
     os.makedirs(output_dir, exist_ok=True)
-    print(f"Found {len(sessions)} agent session(s) and {len(simple_sessions)} simple log(s). Exporting to: {output_dir}")
+    print(f"Found {len(agent_df) if agent_df is not None else 0} agent session(s) and {len(simple_df) if simple_df is not None else 0} simple log(s). Exporting to: {output_dir}")
 
     # 2. Process and write each agent session to a file
-    for session_id, logs in sessions.items():
-        conversation_turns = []
-        # Sort logs by step to reconstruct the conversation order
-        sorted_logs = sorted(logs, key=lambda x: x.get("step", 0))
-        
-        # Reconstruct ground_truth from the session
-        session_ground_truth = None
-        for log in sorted_logs:
-            if log.get("ground_truth"):
-                session_ground_truth = log.get("ground_truth")
-                break # Found it
+    if agent_df is not None and not agent_df.empty:
+        for session_id, group_df in agent_df.groupby('session_id'):
+            conversation_turns = []
+            # Sort by eval_id to maintain turn order
+            sorted_group_df = group_df.sort_values(by='eval_id')
 
-        for log in sorted_logs:
-            if log.get("log_type") == "user_message":
-                conversation_turns.append({
-                    "user_content": {"parts": [{"text": log.get("message", "")}]}
-                })
-            elif log.get("log_type") == "final_answer":
-                conversation_turn = {
-                    "final_response": {"parts": [{"text": log.get("final_answer", "")}]}
+            for _, row in sorted_group_df.iterrows():
+                user_content = row["user_content"]
+                agent_response = row["agent_response"]
+                reference = row["reference"]
+
+                turn = {
+                    "user_content": {"parts": [{"text": user_content}]},
+                    "final_response": {"parts": [{"text": agent_response}]}
                 }
-                if session_ground_truth:
-                    conversation_turn["expected_final_response"] = {"parts": [{"text": session_ground_truth if isinstance(session_ground_truth, str) else session_ground_truth.get("reference")}]}
-                conversation_turns.append(conversation_turn)
+                if reference:
+                    turn["expected_final_response"] = {"parts": [{"text": reference}]}
+                conversation_turns.append(turn)
+            
+            # Assuming ground_truth is consistent across turns for a session, take the first one
+            ground_truth_obj = group_df["ground_truth"].iloc[0] if "ground_truth" in group_df.columns else {}
 
-        # Prepare ground_truth for the eval case
-        ground_truth_obj = {}
-        if session_ground_truth:
-            if isinstance(session_ground_truth, dict):
-                ground_truth_obj = session_ground_truth
-            else:
-                # Assuming string ground_truth implies a 'reference' for a default metric
-                ground_truth_obj = {"reference": session_ground_truth, "metric_type": "bleu"} # Defaulting metric_type
-
-        eval_set = {
-            "eval_set_id": session_id, 
-            "eval_cases": [{
-                "eval_id": f"case-{session_id}", 
-                "conversation": conversation_turns,
-                "ground_truth": ground_truth_obj
-            }]
-        }
-        output_filename = os.path.join(output_dir, f"rag-agent.evalset.{session_id}.json")
-        with open(output_filename, 'w') as f:
-            json.dump(eval_set, f, indent=2)
-        print(f"  - Successfully exported session {session_id} to {output_filename}")
+            eval_set = {
+                "eval_set_id": session_id, 
+                "eval_cases": [{
+                    "eval_id": f"case-{session_id}", 
+                    "conversation": conversation_turns,
+                    "ground_truth": ground_truth_obj
+                }]
+            }
+            output_filename = os.path.join(output_dir, f"rag-agent.evalset.{session_id}.json")
+            with open(output_filename, 'w') as f:
+                json.dump(eval_set, f, indent=2)
+            print(f"  - Successfully exported agent session {session_id} to {output_filename}")
 
     # 3. Process and write each simple session to a file
-    for request_id, logs in simple_sessions.items():
-        prompt = ""
-        response = ""
-        ground_truth_str = ""
-        for log in logs:
-            if "prompt" in log and log["prompt"]:
-                prompt = log["prompt"]
-            if "response" in log and log["response"]:
-                response = log["response"]
-            if "ground_truth" in log and log["ground_truth"]:
-                ground_truth_str = log["ground_truth"]
+    if simple_df is not None and not simple_df.empty:
+        for _, row in simple_df.iterrows():
+            request_id = row["session_id"] # For simple logs, session_id is the request_id
+            prompt = row["user_content"]
+            response = row["agent_response"]
+            reference = row["reference"]
+            metric_type = row["metric_type"] # Should be "simple" now
 
-        if not prompt:
-            continue  # Skip if no prompt found
-
-        # Generate a unique ID for this simple log based on its content and timestamp
-        prompt_hash = hashlib.sha256(prompt.encode()).hexdigest()[:8]
-        eval_set_id = f"adk-web-{datetime.now().strftime('%Y%m%d%H%M%S')}-{prompt_hash}"
-
-        conversation_turns = [{
-            "user_content": {"parts": [{"text": prompt}]},
-            "final_response": {"parts": [{"text": response}]}
-        }]
-
-        if ground_truth_str:
-            conversation_turns[-1]["expected_final_response"] = {"parts": [{"text": ground_truth_str}]}
-        
-        ground_truth_obj = {
-            "reference": ground_truth_str,
-            "metric_type": "bleu" # Defaulting metric_type
-        }
-
-        eval_set = {
-            "eval_set_id": eval_set_id, 
-            "eval_cases": [{
-                "eval_id": f"case-{eval_set_id}", 
-                "conversation": conversation_turns,
-                "ground_truth": ground_truth_obj
+            conversation_turns = [{
+                "user_content": {"parts": [{"text": prompt}]},
+                "final_response": {"parts": [{"text": response}]}
             }]
-        }
-        output_filename = os.path.join(output_dir, f"rag-agent.evalset.{eval_set_id}.json")
-        with open(output_filename, 'w') as f:
-            json.dump(eval_set, f, indent=2)
-        print(f"  - Successfully exported ADK web log to {output_filename}")
+
+            if reference:
+                conversation_turns[-1]["expected_final_response"] = {"parts": [{"text": reference}]}
+            
+            ground_truth_obj = {
+                "reference": reference,
+                "metric_type": metric_type
+            }
+
+            eval_set = {
+                "eval_set_id": request_id, 
+                "eval_cases": [{
+                    "eval_id": f"case-{request_id}", 
+                    "conversation": conversation_turns,
+                    "ground_truth": ground_truth_obj
+                }]
+            }
+            output_filename = os.path.join(output_dir, f"rag-agent.evalset.{request_id}.json")
+            with open(output_filename, 'w') as f:
+                json.dump(eval_set, f, indent=2)
+            print(f"  - Successfully exported simple ADK web log to {output_filename}")
 
 def generate_radar_chart(all_summary_metrics_data: list[tuple[dict, str]], current_time_str: str) -> str:
     """Generates a radar chart from multiple sets of summary metrics and returns it as a base64 PNG."""
@@ -329,8 +346,12 @@ def run_evaluation_and_generate_artifacts(eval_df: pd.DataFrame | None = None, a
         last_run = get_last_run_timestamp()
 
     if eval_df is not None:
-        agent_df = eval_df
-        simple_df = None # Assuming evalset files are for agentic evaluations
+        agent_df = eval_df[eval_df['ground_truth'].apply(lambda x: x.get('metric_type') != 'simple')] if not eval_df.empty else pd.DataFrame()
+        simple_df = eval_df[eval_df['ground_truth'].apply(lambda x: x.get('metric_type') == 'simple')] if not eval_df.empty else pd.DataFrame()
+        if agent_df.empty:
+            agent_df = None
+        if simple_df.empty:
+            simple_df = None
     else:
         agent_df, simple_df = get_logs_for_evaluation(last_run)
     
@@ -413,29 +434,33 @@ def run_evaluation_and_generate_artifacts(eval_df: pd.DataFrame | None = None, a
             elif metrics_df is not None:
                 print(f"Metrics DataFrame generated for {metric_type}, but 'session_id' column not found. Skipping for combined CSV.")
 
+    if all_metrics_dfs:
+        # Create a list to hold processed dataframes for concatenation
+        processed_dfs_for_concat = []
+        for df in all_metrics_dfs:
+            if df.empty or 'metric_type' not in df.columns:
+                continue
+            current_metric_type = df['metric_type'].iloc[0]
+            score_cols = [col for col in df.columns if col not in ['session_id', 'response', 'reference', 'metric_type', 'prompt', 'conversation', 'ground_truth']]
 
-        if all_metrics_dfs:
-            # Create a list to hold processed dataframes for concatenation
-            processed_dfs_for_concat = []
-            for df in all_metrics_dfs:
-                if df.empty or 'metric_type' not in df.columns:
-                    continue
-                current_metric_type = df['metric_type'].iloc[0]
-                score_cols = [col for col in df.columns if col not in ['session_id', 'response', 'reference', 'metric_type', 'prompt', 'conversation', 'ground_truth']]
+            if score_cols:
+                # Create a new DataFrame with session_id and all score columns
+                temp_df = df[['session_id'] + score_cols].copy()
+                
+                # Melt the DataFrame to convert score columns into metric_type and metric_value
+                melted_df = temp_df.melt(id_vars=['session_id'], var_name='metric_type', value_name='metric_value')
+                
+                # Clean up metric_type names (e.g., 'fluency_score' -> 'fluency')
+                melted_df['metric_type'] = melted_df['metric_type'].str.replace('_score', '')
+                
+                processed_dfs_for_concat.append(melted_df)
 
-                if score_cols:
-                    primary_score_col = score_cols[0]
-                    # Create a new DataFrame with session_id, metric_type, and metric_value
-                    temp_df = df[['session_id', primary_score_col]].copy()
-                    temp_df.rename(columns={primary_score_col: 'metric_value'}, inplace=True)
-                    temp_df['metric_type'] = current_metric_type
-                    processed_dfs_for_concat.append(temp_df)
+        if processed_dfs_for_concat:
+            # Concatenate all processed DataFrames vertically
+            final_combined_df = pd.concat(processed_dfs_for_concat, ignore_index=True)
+            # Reorder columns for clarity
+            final_combined_df = final_combined_df[['session_id', 'metric_type', 'metric_value']]
 
-            if processed_dfs_for_concat:
-                # Concatenate all processed DataFrames vertically
-                final_combined_df = pd.concat(processed_dfs_for_concat, ignore_index=True)
-                # Reorder columns for clarity
-                final_combined_df = final_combined_df[['session_id', 'metric_type', 'metric_value']]
         if all_summary_metrics_data:
             combined_radar_chart_base64 = generate_radar_chart(all_summary_metrics_data, current_time_str)
             if combined_radar_chart_base64:
@@ -473,9 +498,9 @@ def run_evaluation_and_generate_artifacts(eval_df: pd.DataFrame | None = None, a
         simple_metrics = ["fluency", "coherence", "safety", "rouge", "bleu"]
         
         # --- Apply same fix for simple_df ---
-        simple_df_cleaned = simple_df[["response", "reference"]]
+        simple_df_cleaned = simple_df[["response", "reference", "prompt"]]
         simple_df_cleaned = simple_df_cleaned.replace("", np.nan)
-        simple_df_cleaned = simple_df_cleaned.dropna(subset=["response", "reference"], how='any')
+        simple_df_cleaned = simple_df_cleaned.dropna(subset=["response"], how='any')
         
         if simple_df_cleaned.empty:
             print("Skipping simple evaluation due to empty DataFrame after dropping NaNs/empty strings.")
@@ -523,13 +548,14 @@ def _execute_evaluation_run_for_artifacts(
     elif metric_type == "rouge":
         metrics_to_apply = ["rouge"]
     elif metric_type == "simple": # Handle the 'simple' case
-        metrics_to_apply = ["fluency", "coherence", "safety", "rouge", "bleu"]
+        metrics_to_apply = ["fluency", "coherence", "safety"]
+        # Only add ROUGE and BLEU if there are non-empty references
+        if not eval_df["reference"].replace('', np.nan).dropna().empty:
+            metrics_to_apply.extend(["rouge", "bleu"])
     else:
         metrics_to_apply = ["fluency", "rouge"]
 
-    print(f"Debugging evaluation for metric_type: {metric_type}")
-    print(f"Eval DataFrame head (post-cleaning):\n{eval_df.head()}")
-    print(f"Metrics to apply: {metrics_to_apply}")
+
     eval_task = EvalTask(
         dataset=eval_df,
         metrics=metrics_to_apply,
@@ -570,9 +596,14 @@ def main():
         help="Path to a specific .evalset.json file to use for evaluation."
     )
     parser.add_argument(
-        "--original-csv-path",
+        "--output-csv-path",
         type=str,
-        help="Path to the original eval_test_cases.csv file to merge metrics into."
+        help="Path to the CSV file where combined evaluation results will be saved."
+    )
+    parser.add_argument(
+        "--session-id",
+        type=str,
+        help="Optional: Filter logs by a specific session ID when exporting to CSV."
     )
     parser.add_argument(
         "--export-to-csv",
@@ -582,26 +613,33 @@ def main():
     args = parser.parse_args()
 
     if args.export_to_csv:
-        agent_df, simple_df = get_logs_for_evaluation(None)
-        if agent_df is not None or simple_df is not None:
-            df = pd.concat([agent_df, simple_df])
-            df = df[["instruction", "initial_prompt", "reference"]]
-            df = df.rename(columns={"reference": "ground_truth"})
-            df["metric_type"] = ""
+        combined_df = get_logs_for_evaluation(None, filter_session_id=args.session_id) # This now returns a single DataFrame
+        
+        if combined_df is not None and not combined_df.empty:
+            # Ensure all required columns exist, initializing if missing
+            required_columns = ["eval_id", "session_id", "user_content", "agent_response", "reference", "metric_type", "metric_value"]
+            for col in required_columns:
+                if col not in combined_df.columns:
+                    combined_df[col] = "" # Initialize missing columns as empty strings
+
+            # Select and reorder columns to match the desired format
+            df_to_export = combined_df[required_columns].copy()
+
+            # Filter out rows where user_content or agent_response are empty
+            df_to_export = df_to_export[df_to_export["user_content"].astype(bool) & df_to_export["agent_response"].astype(bool)]
+            
+            # Drop any rows where all essential columns are empty, just in case
+            df_to_export.dropna(subset=["user_content", "agent_response"], how='all', inplace=True)
+
             output_path = os.path.join(os.path.dirname(__file__), '..', 'agents', 'rag-agent', 'eval_sets', 'eval_test_cases.csv')
-            df.to_csv(output_path, index=False)
+            df_to_export.to_csv(output_path, index=False)
             print(f"Successfully exported logs to {output_path}")
         else:
             print("No logs found to export.")
         return
 
 
-    if args.use_evalset_files and not args.original_csv_path:
-        # Infer default original_csv_path based on eval_sets_dir
-        eval_sets_dir = os.path.join(os.path.dirname(__file__), '..', 'agents', 'rag-agent', 'eval_sets')
-        default_csv_path = os.path.join(os.path.dirname(eval_sets_dir), "eval_test_cases.csv")
-        args.original_csv_path = default_csv_path
-        print(f"No original CSV path provided. Defaulting to: {args.original_csv_path}")
+
 
     if args.export_sessions:
         export_sessions_to_evalset(get_last_run_timestamp() if not args.all_time else None)
@@ -681,53 +719,49 @@ def main():
             artifacts, final_combined_df = run_evaluation_and_generate_artifacts(eval_df=eval_df, all_time=args.all_time, session_id=session_id_from_df)
 
             if final_combined_df is not None and not final_combined_df.empty:
-                if args.original_csv_path:
+
+                if args.output_csv_path:
                     original_df = None
                     try:
                         import csv
-                        original_df = pd.read_csv(args.original_csv_path, sep=',', quotechar='"', doublequote=True, engine='python', on_bad_lines='skip')
+                        original_df = pd.read_csv(args.output_csv_path, sep=',', quotechar='"', doublequote=True, engine='python', on_bad_lines='skip')
                         original_df.drop_duplicates(subset=['eval_id'], inplace=True)
                     except FileNotFoundError:
-                        print(f"Error: Original CSV file not found at {args.original_csv_path}. Cannot save results to the original CSV.")
+                        print(f"Error: Output CSV file not found at {args.output_csv_path}. Cannot save results to the CSV.")
                         original_df = pd.DataFrame() # Create empty df to avoid further errors
 
                     if not original_df.empty: # Only proceed if original_df was successfully loaded or created
-                        # Merge original_df with final_combined_df (which is already in long format)
-                        merged_output_df = pd.merge(original_df, final_combined_df, left_on='eval_id', right_on='session_id', how='left')
+                        # Pivot final_combined_df to wide format
+                        pivoted_metrics_df = final_combined_df.pivot(index='session_id', columns='metric_type', values='metric_value')
+                        pivoted_metrics_df = pivoted_metrics_df.add_suffix('_score').reset_index()
+                        pivoted_metrics_df.rename(columns={'session_id': 'eval_id'}, inplace=True)
 
-                        # Drop the redundant 'session_id' column from the merged DataFrame
-                        if 'session_id' in merged_output_df.columns:
-                            merged_output_df.drop(columns=['session_id'], inplace=True)
-
-                        # Rename '_y' columns to their base names
-                        if 'metric_type_y' in merged_output_df.columns:
-                            merged_output_df.rename(columns={'metric_type_y': 'metric_type'}, inplace=True)
-                        if 'metric_value_y' in merged_output_df.columns:
-                            merged_output_df.rename(columns={'metric_value_y': 'metric_value'}, inplace=True)
-
-                        # Identify and drop old metric columns from original_df and the temporary '_x' columns
-                        # This list should be comprehensive for all possible old metric columns and their '_x' versions
-                        old_metric_cols_to_drop = [
-                            'metric_type_x', 'metric_value_x', # From original_df
-                            'bleu', 'contains_words', 'rouge', 'GROUNDING_x', 'GROUNDING_y', 'GROUNDING' # Other potential old metric columns
-                        ]
-                        cols_to_drop = [col for col in old_metric_cols_to_drop if col in merged_output_df.columns]
-                        if cols_to_drop:
-                            merged_output_df.drop(columns=cols_to_drop, inplace=True)
-
-                        # Ensure the desired columns are present and in order
-                        current_cols = merged_output_df.columns.tolist()
-                        # Filter out 'metric_type' and 'metric_value' if they are already in current_cols (to avoid duplication)
-                        final_cols = [col for col in current_cols if col not in ['metric_type', 'metric_value']] + ['metric_type', 'metric_value']
-                        merged_output_df = merged_output_df[final_cols]
-
-                        try:
-                            merged_output_df.to_csv(args.original_csv_path, index=False)
-                            print(f"Combined evaluation results saved to original CSV: {args.original_csv_path}")
-                        except Exception as e:
-                            print(f"Error saving combined evaluation results to CSV: {e}")
+                        # Merge original_df with the pivoted metrics
+                        merged_output_df = pd.merge(original_df, pivoted_metrics_df, on='eval_id', how='left')
+                        
+                        # Drop the old metric_type and metric_value columns from the original_df if they exist
+                        cols_to_drop_from_original = [col for col in ['metric_type', 'metric_value'] if col in merged_output_df.columns]
+                        if cols_to_drop_from_original:
+                            merged_output_df.drop(columns=cols_to_drop_from_original, inplace=True)
                     else:
-                        print("Warning: Original CSV could not be loaded or was empty. Metrics will not be saved to a CSV file.")
+                        # If original_df was empty, then merged_output_df is just the pivoted metrics
+                        merged_output_df = pivoted_metrics_df.rename(columns={'session_id': 'eval_id'}) # Ensure eval_id is consistent
+                        # If original_df was empty, we still need to ensure the eval_id is correctly set for the merge.
+                        # However, if original_df is empty, it means the input CSV was empty, which is an edge case.
+                        # For now, let's assume original_df is not empty if args.output_csv_path is provided.
+                        # If original_df is empty, we should just save the pivoted_metrics_df.
+                        merged_output_df = pivoted_metrics_df.rename(columns={'session_id': 'eval_id'}) # Ensure eval_id is consistent
+                        merged_output_df.columns = merged_output_df.columns.str.replace('_score', '') # Remove suffix for consistency if no original_df
+                        merged_output_df = merged_output_df.add_suffix('_score') # Add suffix back for consistency
+                        merged_output_df.rename(columns={'eval_id_score': 'eval_id'}, inplace=True) # Rename eval_id back
+
+
+                    
+                    try:
+                        merged_output_df.to_csv(args.output_csv_path, index=False)
+                        print(f"Combined evaluation results saved to CSV: {args.output_csv_path}")
+                    except Exception as e:
+                        print(f"Error saving combined evaluation results to CSV: {e}")
     else:
         artifacts, final_combined_df = run_evaluation_and_generate_artifacts(all_time=args.all_time)
 

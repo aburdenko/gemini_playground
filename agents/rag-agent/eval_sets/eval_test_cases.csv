@@ -1,3 +1,7 @@
-invocation_id,eval_id,evalset_id,user_content,agent_response,reference,metric_type,metric_value
-1,capital_france,,What is the capital of France?,,The capital of France is Paris.,exact_match,
-2,romeo_juliet,,Who wrote Romeo and Juliet?,,William Shakespeare wrote Romeo and Juliet.,exact_match,
+eval_id,session_id,user_content,agent_response,reference,metric_type,metric_value
+ccfe4d22-0762-4e04-9d26-ac97df25411f-0,ccfe4d22-0762-4e04-9d26-ac97df25411f,What would a trained psychologist say is Alice's main problem?,"A trained psychologist would likely identify Alice's main problem as a significant **identity crisis** and **emotional dysregulation**, exacerbated by the highly unusual and disorienting circumstances she finds herself in.
+
+She frequently questions ""Who in the world am I?"" and expresses that she is ""not myself,"" struggling to reconcile her perception of herself with the constant changes in her size and surroundings. This leads to confusion and difficulty explaining herself to others.
+
+Furthermore, Alice exhibits considerable internal conflict and self-reprimand, often scolding herself severely and even wishing to ""box her own ears"" for perceived wrongdoings. She also experiences intense emotional shifts, crying ""gallons of tears"" and then abruptly stopping, indicating a struggle to manage her feelings. She expects ""nothing but out-of-the-way things to happen,"" which suggests a disconnect from typical reality and an unusual expectation of her environment.",,simple,
+ccfe4d22-0762-4e04-9d26-ac97df25411f-1,ccfe4d22-0762-4e04-9d26-ac97df25411f,what did Alice think of Wonderland?,"Alice found Wonderland to be very confusing and curious, often expressing a sense of unease and bewilderment. She observed that the inhabitants, particularly during the croquet game, did not play fairly, quarreled dreadfully, and lacked clear rules. She also found it confusing that many things were alive. Despite wishing she hadn't come to Wonderland at times, she also found the ""sort of life"" there to be ""rather curious."" She was wary of the Queen and even felt a need to escape.",,simple,

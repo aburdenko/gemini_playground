@@ -1,0 +1,13 @@
+invocation_id,eval_id,evalset_id,user_content,agent_response,metric,reference,metric_type,metric_value
+e-8f19bb98-6f47-4493-b58f-78e2f70d2fe5,case3078c3,evalsetabbbfe,How did Alice get to Wonderland?,Alice got to Wonderland by going through the Looking-glass.,GROUNDING,Looking-glass,GROUNDING,"The response is a single word, which inherently limits its ability to demonstrate key aspects of fluency as defined by the rubric. While the word 'Looking-glass' is grammatically correct on its own, the response does not employ varied sentence structures, maintain a consistent tone, or exhibit a smooth and natural flow, as there is no textual composition beyond a single term to assess these qualities. It fails to demonstrate fluency beyond basic word recognition, hence scoring low due to its lack of textual features for evaluation."
+e-b742b295-9336-4d22-829e-aab459b7c22c,case1a4c60,evalsetb74e0f,and AliceInWonderland.pdf?,"Yes, AliceInWonderland.pdf is one of the sources.",GROUNDING,Alice,GROUNDING,"The response consists of a single word, 'Alice', which is grammatically correct and directly relevant to the user's prompt. Word choice is clear and appropriate. While its brevity prevents it from demonstrating varied sentence structures or a complex flow, it contains no grammatical errors or awkward phrasing, fulfilling the core aspects of fluency for its limited scope."
+e-a7061ed7-3f33-49da-83fe-e9fb99999081,1,evalsetb74e0f,"You wrote ""The sources I see are:
+
+GulliversTravels.pdf
+PeterPan.pdf
+WizardOfOz.pdf""","The sources I see are:
+
+GulliversTravels.pdf
+PeterPan.pdf
+WizardOfOz.pdf",,,,
+e-0c9b7afe-d1d6-4f32-bd20-8adf9ba8177e,case71a59a,evalsetbf4c4c,How did Alice get to Wonderland?,Alice had to go back through the Looking-glass.,,,,

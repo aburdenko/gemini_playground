@@ -49,7 +49,7 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Step 2: Running evaluation with generated .evalset.json..."
-python3 "$EVAL_AGENT_SCRIPT" --use-evalset-files --all-time --original-csv-path "$CSV_PATH" --evalset-file "$OUTPUT_JSON"
+python3 "$EVAL_AGENT_SCRIPT" --use-evalset-files --all-time --output-csv-path "$CSV_PATH" --evalset-file "$OUTPUT_JSON"
 
 if [ $? -ne 0 ]; then
   echo "Error: Evaluation failed." >&2
