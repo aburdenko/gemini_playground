@@ -29,6 +29,12 @@ EVAL_AGENT_SCRIPT="${SCRIPT_DIR}/eval_agent.py"
 DEFAULT_CSV_PATH="${PROJECT_ROOT}/agents/rag-agent/eval_sets/eval_test_cases.csv"
 EVALSET_DIR="${PROJECT_ROOT}/agents/rag-agent/eval_sets"
 
+
+# Delete old evaluation files
+echo "Deleting old evaluation files..."
+find "${EVALSET_DIR}" -name "generated_evalset_*.evalset.json" -delete
+find "${EVALSET_DIR}" -name "*_radar_chart_*.png" -delete
+
 # Set CSV_PATH, defaulting if not provided
 CSV_PATH="${1:-$DEFAULT_CSV_PATH}"
 TIMESTAMP=$(date +%Y%m%d%H%M%S)
