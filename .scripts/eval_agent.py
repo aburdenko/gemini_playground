@@ -25,6 +25,11 @@ import io
 import base64
 import argparse
 from typing import Dict, Any
+import sys
+import os
+
+# Add the 'rag-agent' directory to the Python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'agents', 'rag-agent')))
 
 from app.evaluators import ContainsWords
 
@@ -351,10 +356,13 @@ def run_evaluation_and_generate_artifacts(eval_df: pd.DataFrame | None = None, a
             if not metric_type:
                 print(f"Skipping evaluation for {len(group_df_original)} rows with no metric_type.")
                 continue
+            if metric_type == "MANUAL":
+                print(f"Skipping automatic metric calculation for {len(group_df_original)} rows with MANUAL metric_type.")
+                continue
 
             # --- START MODIFICATION ---
             # Select relevant columns and include session_id
-            group_df = group_df_original[["response", "reference", "session_id"]]
+            group_df = group_df_original[["response", "reference", "session_id", "prompt"]]
             
             # Replace empty strings with NaN so dropna works on them
             # The SDK requires non-empty strings for both fields for metrics like 'bleu'
@@ -407,32 +415,27 @@ def run_evaluation_and_generate_artifacts(eval_df: pd.DataFrame | None = None, a
 
 
         if all_metrics_dfs:
-            # Create a list to hold processed dataframes for merging
-            processed_dfs = []
+            # Create a list to hold processed dataframes for concatenation
+            processed_dfs_for_concat = []
             for df in all_metrics_dfs:
                 if df.empty or 'metric_type' not in df.columns:
                     continue
-                # Identify the metric value column(s) in the current df
                 current_metric_type = df['metric_type'].iloc[0]
-                
-                # Find the actual score column for this metric type
                 score_cols = [col for col in df.columns if col not in ['session_id', 'response', 'reference', 'metric_type', 'prompt', 'conversation', 'ground_truth']]
-                
-                if score_cols:
-                    # Take the first score column as the primary score for this metric type
-                    primary_score_col = score_cols[0]
-                    
-                    # Create a new DataFrame with session_id and the renamed score column
-                    temp_df = df[['session_id', primary_score_col]].copy()
-                    temp_df.rename(columns={primary_score_col: current_metric_type}, inplace=True)
-                    processed_dfs.append(temp_df)
-            
-            if processed_dfs:
-                # Merge all processed DataFrames on 'session_id'
-                final_combined_df = processed_dfs[0]
-                for i in range(1, len(processed_dfs)):
-                    final_combined_df = pd.merge(final_combined_df, processed_dfs[i], on='session_id', how='outer')
 
+                if score_cols:
+                    primary_score_col = score_cols[0]
+                    # Create a new DataFrame with session_id, metric_type, and metric_value
+                    temp_df = df[['session_id', primary_score_col]].copy()
+                    temp_df.rename(columns={primary_score_col: 'metric_value'}, inplace=True)
+                    temp_df['metric_type'] = current_metric_type
+                    processed_dfs_for_concat.append(temp_df)
+
+            if processed_dfs_for_concat:
+                # Concatenate all processed DataFrames vertically
+                final_combined_df = pd.concat(processed_dfs_for_concat, ignore_index=True)
+                # Reorder columns for clarity
+                final_combined_df = final_combined_df[['session_id', 'metric_type', 'metric_value']]
         if all_summary_metrics_data:
             combined_radar_chart_base64 = generate_radar_chart(all_summary_metrics_data, current_time_str)
             if combined_radar_chart_base64:
@@ -508,7 +511,7 @@ def _execute_evaluation_run_for_artifacts(
     current_time_str: str
 ):
     metric_type = metric_type.strip()
-    run_name = f"custom-metric-{current_time_str}" if metric_type == "contains_words" else f"{metric_type}-{current_time_str}"
+    run_name = f"custom-metric-{current_time_str}" if metric_type == "contains_words" else f"{metric_type.lower().replace('_', '-')}-{current_time_str}"
     full_judgement_model_name = f"projects/{PROJECT_ID}/locations/{LOCATION}/publishers/google/models/{JUDGEMENT_MODEL_NAME}"
     autorater_config = AutoraterConfig(autorater_model=full_judgement_model_name)
 
@@ -571,7 +574,27 @@ def main():
         type=str,
         help="Path to the original eval_test_cases.csv file to merge metrics into."
     )
+    parser.add_argument(
+        "--export-to-csv",
+        action="store_true",
+        help="Export logs to eval_test_cases.csv."
+    )
     args = parser.parse_args()
+
+    if args.export_to_csv:
+        agent_df, simple_df = get_logs_for_evaluation(None)
+        if agent_df is not None or simple_df is not None:
+            df = pd.concat([agent_df, simple_df])
+            df = df[["instruction", "initial_prompt", "reference"]]
+            df = df.rename(columns={"reference": "ground_truth"})
+            df["metric_type"] = ""
+            output_path = os.path.join(os.path.dirname(__file__), '..', 'agents', 'rag-agent', 'eval_sets', 'eval_test_cases.csv')
+            df.to_csv(output_path, index=False)
+            print(f"Successfully exported logs to {output_path}")
+        else:
+            print("No logs found to export.")
+        return
+
 
     if args.use_evalset_files and not args.original_csv_path:
         # Infer default original_csv_path based on eval_sets_dir
@@ -659,132 +682,52 @@ def main():
 
             if final_combined_df is not None and not final_combined_df.empty:
                 if args.original_csv_path:
+                    original_df = None
                     try:
-                        # Use the more robust 'python' engine and specify quoting to handle
-                        # potential commas within the text fields of the CSV.
                         import csv
                         original_df = pd.read_csv(args.original_csv_path, sep=',', quotechar='"', doublequote=True, engine='python', on_bad_lines='skip')
                         original_df.drop_duplicates(subset=['eval_id'], inplace=True)
-                        # Merge original_df with final_combined_df on session_id
-                        # Assuming session_id in final_combined_df corresponds to eval_id in original_df
-                        # This might need adjustment based on the actual content of original_df
-                        # Identify metric columns in final_combined_df (all columns except 'session_id')
-                        metric_cols = [col for col in final_combined_df.columns if col != 'session_id']
+                    except FileNotFoundError:
+                        print(f"Error: Original CSV file not found at {args.original_csv_path}. Cannot save results to the original CSV.")
+                        original_df = pd.DataFrame() # Create empty df to avoid further errors
 
-                        # Rename metric columns in final_combined_df with a temporary prefix to avoid merge conflicts
-                        rename_map = {col: f'_temp_{col}' for col in metric_cols}
-                        final_combined_df_renamed = final_combined_df.rename(columns=rename_map)
+                    if not original_df.empty: # Only proceed if original_df was successfully loaded or created
+                        # Merge original_df with final_combined_df (which is already in long format)
+                        merged_output_df = pd.merge(original_df, final_combined_df, left_on='eval_id', right_on='session_id', how='left')
 
-                        # Perform a left merge, explicitly using suffixes to distinguish original and new metric columns
-                        merged_output_df = pd.merge(original_df, final_combined_df, left_on='eval_id', right_on='session_id', how='left', suffixes=('_old', '_new'))
-                        merged_output_df.drop(columns=['session_id'], inplace=True) # Drop redundant session_id column
-
-                        # Iterate through metric columns and replace old values with new ones
-                        metric_cols = [col for col in final_combined_df.columns if col != 'session_id']
-                        for metric_col in metric_cols:
-                            new_col = f'{metric_col}_new'
-                            old_col = f'{metric_col}_old'
-
-                            if new_col in merged_output_df.columns:
-                                # If a new metric value exists, use it
-                                merged_output_df[metric_col] = merged_output_df[new_col]
-                                merged_output_df.drop(columns=[new_col], inplace=True) # Drop the new column
-                            
-                            if old_col in merged_output_df.columns:
-                                # If an old metric column exists, drop it after transferring values
-                                merged_output_df.drop(columns=[old_col], inplace=True)
-
-                        # Ensure all metric columns are present, even if they were not in original_df
-                        for metric_col in metric_cols:
-                            if metric_col not in merged_output_df.columns:
-                                merged_output_df[metric_col] = final_combined_df[metric_col] # This might need re-alignment if not all eval_ids are present
-                                # A more robust way would be to re-merge just the missing columns or use fillna after a full merge
-                                # For now, this assumes final_combined_df has all the necessary data aligned by eval_id/session_id
-                                
-                        # Final cleanup: ensure no duplicate columns remain (e.g., if original_df had a column named 'bleu' and final_combined_df also had 'bleu')
-                        # This is handled by the explicit replacement logic above.
-                        # However, if original_df had a column named 'bleu' and final_combined_df also had 'bleu', the above logic would create 'bleu_old' and 'bleu_new'.
-                        # The above logic should correctly handle this by creating a new 'bleu' column from 'bleu_new' and dropping 'bleu_old'.
-                        # The issue is if original_df had 'bleu' and final_combined_df did NOT have 'bleu', then 'bleu_old' would remain.
-                        # Let's simplify the logic to ensure the final columns are correct.
-
-                        # Re-evaluate the column handling after merge
-                        # The goal is: original_df columns + new metric columns from final_combined_df
-                        # If a column exists in both, take from final_combined_df
-
-                        # Let's try a different approach for column handling after merge
-                        # 1. Merge with suffixes
-                        # 2. Create a list of final columns
-                        # 3. Populate final columns based on _new values, then _old values, then original values
-
-                        # This is the most robust way to handle column precedence:
-                        # For each metric column, if a '_new' version exists, use it. Otherwise, if an '_old' version exists, use it.
-                        # If neither, then it's a new column from final_combined_df.
-
-                        final_cols = list(original_df.columns)
-                        for metric_col in metric_cols:
-                            if f'{metric_col}_new' in merged_output_df.columns:
-                                merged_output_df[metric_col] = merged_output_df[f'{metric_col}_new']
-                            elif f'{metric_col}_old' in merged_output_df.columns:
-                                # This case means the metric was in original_df but not in final_combined_df
-                                # We should keep the original value, but it should have been handled by the merge
-                                pass # No change needed, original value is already in metric_col
-                            else:
-                                # This case means the metric was not in original_df, but is in final_combined_df
-                                # It should have been added by the merge as metric_col_new and then renamed
-                                pass # This should not happen if merge is done correctly
-
-                        # Drop all _old and _new columns
-                        cols_to_drop = [col for col in merged_output_df.columns if col.endswith('_old') or col.endswith('_new')]
-                        merged_output_df.drop(columns=cols_to_drop, inplace=True)
-
-                        # Ensure the order of columns is preserved as much as possible, with new metrics at the end
-                        # This might require reordering columns explicitly if the user has a specific order in mind.
-                        # For now, new metrics will appear at the end.
-
-                        # The previous logic for dropping redundant session_id column is still valid.
-                        # merged_output_df.drop(columns=['session_id'], inplace=True) # This was already done above
-
-                        # Let's simplify the column handling after merge to avoid complexity.
-                        # The goal is to have original columns + new metric columns.
-                        # If a metric column exists in original_df, its value should be updated from final_combined_df.
-
-                        # This is the most straightforward way to achieve the desired behavior:
-                        # 1. Merge with suffixes.
-                        # 2. For each metric column, create a new column with the base name.
-                        # 3. Populate this new column with values from the '_new' column (calculated metrics).
-                        # 4. Drop the '_old' and '_new' columns.
-
-                        # This ensures that the calculated metrics always take precedence.
-
-                        # Initialize metric columns in original_df if they don't exist
-                        for col in ['bleu', 'contains_words', 'rouge']:
-                            if col not in original_df.columns:
-                                original_df[col] = np.nan # Or ''
-
-                        # Merge final_combined_df into original_df
-                        # This will add columns from final_combined_df to original_df for matching rows
-                        # and create new columns if they don't exist.
-                        merged_output_df = pd.merge(original_df, final_combined_df, left_on='eval_id', right_on='session_id', how='left', suffixes=('', '_y'))
-
-                        # Update the metric columns in merged_output_df with values from final_combined_df
-                        for col in ['bleu', 'contains_words', 'rouge']:
-                            if f'{col}_y' in merged_output_df.columns:
-                                merged_output_df[col] = merged_output_df[f'{col}_y']
-                                merged_output_df.drop(columns=[f'{col}_y'], inplace=True)
-                        
                         # Drop the redundant 'session_id' column from the merged DataFrame
                         if 'session_id' in merged_output_df.columns:
                             merged_output_df.drop(columns=['session_id'], inplace=True)
 
-                        merged_output_df.to_csv(args.original_csv_path, index=False)
-                        print(f"Combined evaluation results saved to original CSV: {args.original_csv_path}")
-                    except FileNotFoundError:
-                        print(f"Error: Original CSV file not found at {args.original_csv_path}. Cannot save results to the original CSV.")
-                else:
-                    print("Warning: No original CSV path provided and no default could be inferred. Metrics will not be saved to a CSV file.")
-        else:
-            print("No evalset files found or no cases to evaluate.")
+                        # Rename '_y' columns to their base names
+                        if 'metric_type_y' in merged_output_df.columns:
+                            merged_output_df.rename(columns={'metric_type_y': 'metric_type'}, inplace=True)
+                        if 'metric_value_y' in merged_output_df.columns:
+                            merged_output_df.rename(columns={'metric_value_y': 'metric_value'}, inplace=True)
+
+                        # Identify and drop old metric columns from original_df and the temporary '_x' columns
+                        # This list should be comprehensive for all possible old metric columns and their '_x' versions
+                        old_metric_cols_to_drop = [
+                            'metric_type_x', 'metric_value_x', # From original_df
+                            'bleu', 'contains_words', 'rouge', 'GROUNDING_x', 'GROUNDING_y', 'GROUNDING' # Other potential old metric columns
+                        ]
+                        cols_to_drop = [col for col in old_metric_cols_to_drop if col in merged_output_df.columns]
+                        if cols_to_drop:
+                            merged_output_df.drop(columns=cols_to_drop, inplace=True)
+
+                        # Ensure the desired columns are present and in order
+                        current_cols = merged_output_df.columns.tolist()
+                        # Filter out 'metric_type' and 'metric_value' if they are already in current_cols (to avoid duplication)
+                        final_cols = [col for col in current_cols if col not in ['metric_type', 'metric_value']] + ['metric_type', 'metric_value']
+                        merged_output_df = merged_output_df[final_cols]
+
+                        try:
+                            merged_output_df.to_csv(args.original_csv_path, index=False)
+                            print(f"Combined evaluation results saved to original CSV: {args.original_csv_path}")
+                        except Exception as e:
+                            print(f"Error saving combined evaluation results to CSV: {e}")
+                    else:
+                        print("Warning: Original CSV could not be loaded or was empty. Metrics will not be saved to a CSV file.")
     else:
         artifacts, final_combined_df = run_evaluation_and_generate_artifacts(all_time=args.all_time)
 

@@ -12,6 +12,7 @@ def create_evalset_from_csv(csv_path, json_path):
                 "eval_set_id": row["eval_id"], # Use eval_id as eval_set_id
                                         "conversation": [
                                             {
+                                                "invocation_id": f"e-{row['eval_id']}",
                                                 "user_content": {"parts": [{"text": row["user_content"]}]},
                                                 "final_response": {"parts": [{"text": row["reference"]}]}
                                             }
@@ -21,17 +22,19 @@ def create_evalset_from_csv(csv_path, json_path):
                 },
             })
 
-            # Determine the metric, defaulting to 'bleu' if the column is missing
-            metric = row.get("metric", "bleu").strip()
-            if not metric: # Handle cases where the metric column exists but is empty
-                metric = "bleu"
+            # Determine the metric and metric_value
+            metric = row.get("metric_type", "").strip()
+            ground_truth = {
+                "reference": row.get("reference", ""),
+            }
+            if metric:
+                ground_truth[metric] = row.get("reference", "")
+                ground_truth["metric_type"] = metric
+            else:
+                ground_truth["metric_type"] = None # No metric to calculate
 
             # Construct the ground_truth object
-            eval_cases[-1]["ground_truth"] = {
-                "reference": row.get("reference", ""),
-                metric: row.get("reference", ""),
-                "metric_type": metric
-            }
+            eval_cases[-1]["ground_truth"] = ground_truth
 
     eval_set = {
         "eval_set_id": "generated_from_csv",
