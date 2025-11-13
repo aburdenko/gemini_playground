@@ -331,201 +331,397 @@ def generate_metrics_csv(metrics_df: pd.DataFrame) -> str:
     return metrics_df.to_csv(index=False)
 
 def run_evaluation_and_generate_artifacts(eval_df: pd.DataFrame | None = None, all_time: bool = False, session_id: str | None = None):
+
     """
+
     Runs the main evaluation flow.
+
     
+
     Args:
+
         all_time: If True, fetches all logs. Otherwise, fetches logs since the last run.
+
     """
+
     current_time_str = datetime.now().strftime('%Y%m%d%H%M%S')
+
     experiment_name = EXPERIMENT_NAME
+
     aiplatform.init(project=PROJECT_ID, location=LOCATION, experiment=experiment_name)
 
+
+
     last_run = None
+
     if not all_time:
+
         last_run = get_last_run_timestamp()
 
+
+
     if eval_df is not None:
+
         agent_df = eval_df[eval_df['ground_truth'].apply(lambda x: x.get('metric_type') != 'simple')] if not eval_df.empty else pd.DataFrame()
+
         simple_df = eval_df[eval_df['ground_truth'].apply(lambda x: x.get('metric_type') == 'simple')] if not eval_df.empty else pd.DataFrame()
+
         if agent_df.empty:
+
             agent_df = None
+
         if simple_df.empty:
+
             simple_df = None
+
     else:
+
         agent_df, simple_df = get_logs_for_evaluation(last_run)
+
     
+
     artifacts = []
+
     all_metrics_dfs = []
+
     all_summary_metrics_data = []
+
     final_combined_df = None
 
+
+
     if agent_df is not None and not agent_df.empty:
+
         # Initialize GCS client
+
         storage_client = storage.Client(project=PROJECT_ID)
+
         bucket = storage_client.bucket(BUCKET_NAME.replace("gs://", ""))
 
+
+
         # Group by metric_type and run evaluation for each group
+
         def get_metric_type(gt):
+
             if isinstance(gt, dict):
+
                 return gt.get("metric_type")
+
             return None
+
         
+
         agent_df['metric_type'] = agent_df["ground_truth"].apply(get_metric_type)
+
         
+
         for metric_type, group_df_original in agent_df.groupby('metric_type'):
+
             if not metric_type:
+
                 print(f"Skipping evaluation for {len(group_df_original)} rows with no metric_type.")
+
                 continue
+
             if metric_type == "MANUAL":
+
                 print(f"Skipping automatic metric calculation for {len(group_df_original)} rows with MANUAL metric_type.")
+
                 continue
+
+
 
             # --- START MODIFICATION ---
+
             # Select relevant columns and include session_id
+
             group_df = group_df_original[["response", "reference", "session_id", "prompt"]]
+
             
+
             # Replace empty strings with NaN so dropna works on them
+
             # The SDK requires non-empty strings for both fields for metrics like 'bleu'
+
             group_df = group_df.replace("", np.nan)
 
+
+
             # Drop rows where *either* response or reference is missing (NaN)
+
             group_df = group_df.dropna(subset=["response", "reference"], how='any')
 
+
+
             if group_df.empty:
+
                 print(f"Skipping evaluation for {metric_type} due to empty DataFrame after dropping NaNs/empty strings.")
+
                 continue
+
                 
+
             # CRITICAL: The evaluation SDK fails if the DataFrame index is not
+
             # a standard 0-based sequential index. reset_index fixes this.
+
             group_df = group_df.reset_index(drop=True)
+
             # --- END MODIFICATION ---
 
+
+
             if metric_type == "contains_words":
+
                 metrics_to_apply = [CustomMetric(name="contains_words", metric_function=_contains_words_metric_function)]
+
             elif metric_type == "bleu":
+
                 metrics_to_apply = ["bleu"]
+
             else:
+
                 metrics_to_apply = ["fluency", "rouge"]
 
+
+
             try:
+
                 summary_metrics, metrics_df, experiment_run = _execute_evaluation_run_for_artifacts(
+
                     group_df,
+
                     metric_type=metric_type,
+
                     run_name_suffix=f"-{metric_type}",
+
                     experiment_name=experiment_name,
+
                     current_time_str=current_time_str
+
                 )
+
             except Exception as e:
+
                 print(f"Error during evaluation for metric_type {metric_type}: {e}")
+
                 print("Continuing to next metric type...")
+
                 continue # Skip to the next metric
 
+
+
             # session_id is already in metrics_df if it was in group_df_original
+
             # No need to re-add it here.
 
+
+
             if summary_metrics:
+
                 all_summary_metrics_data.append((summary_metrics, metric_type))
 
+
+
             if metrics_df is not None and 'session_id' in metrics_df.columns:
+
                 # Add a 'metric_type' column to distinguish metrics when concatenating
+
                 metrics_df['metric_type'] = metric_type
+
                 all_metrics_dfs.append(metrics_df)
+
             elif metrics_df is not None:
+
                 print(f"Metrics DataFrame generated for {metric_type}, but 'session_id' column not found. Skipping for combined CSV.")
 
+
+
     if all_metrics_dfs:
+
         # Create a list to hold processed dataframes for concatenation
+
         processed_dfs_for_concat = []
+
         for df in all_metrics_dfs:
+
             if df.empty or 'metric_type' not in df.columns:
+
                 continue
+
             current_metric_type = df['metric_type'].iloc[0]
+
             score_cols = [col for col in df.columns if col not in ['session_id', 'response', 'reference', 'metric_type', 'prompt', 'conversation', 'ground_truth']]
 
+
+
             if score_cols:
+
                 # Create a new DataFrame with session_id and all score columns
+
                 temp_df = df[['session_id'] + score_cols].copy()
+
                 
+
                 # Melt the DataFrame to convert score columns into metric_type and metric_value
+
                 melted_df = temp_df.melt(id_vars=['session_id'], var_name='metric_type', value_name='metric_value')
+
                 
+
                 # Clean up metric_type names (e.g., 'fluency_score' -> 'fluency')
+
                 melted_df['metric_type'] = melted_df['metric_type'].str.replace('_score', '')
+
                 
+
                 processed_dfs_for_concat.append(melted_df)
 
+
+
         if processed_dfs_for_concat:
+
             # Concatenate all processed DataFrames vertically
+
             final_combined_df = pd.concat(processed_dfs_for_concat, ignore_index=True)
+
             # Reorder columns for clarity
+
             final_combined_df = final_combined_df[['session_id', 'metric_type', 'metric_value']]
 
+
+
         if all_summary_metrics_data:
+
             combined_radar_chart_base64 = generate_radar_chart(all_summary_metrics_data, current_time_str)
+
             if combined_radar_chart_base64:
+
                 combined_radar_chart_filename = f"all_metrics_radar_chart_{current_time_str}.png"
+
                 blob = bucket.blob(f"evaluation_artifacts/combined/{combined_radar_chart_filename}")
+
                 blob.upload_from_string(base64.b64decode(combined_radar_chart_base64), content_type="image/png")
+
                 gcs_uri = f"gs://{bucket.name}/{blob.name}"
+
                 artifacts.append({
+
                     'id': 'all_metrics_radar_chart',
+
                     'versionId': current_time_str,
+
                     'mimeType': 'image/png',
+
                     'gcsUrl': gcs_uri,
+
                     'data': 'data:image/png;base64,' + combined_radar_chart_base64
+
                 })
+
                 print(f"Combined radar chart uploaded to: {gcs_uri}")
 
+
+
                 eval_sets_dir = os.path.join(os.path.dirname(__file__), '..', 'agents', 'rag-agent', 'eval_sets')
+
                 local_combined_radar_chart_path = os.path.join(eval_sets_dir, combined_radar_chart_filename)
+
                 blob.download_to_filename(local_combined_radar_chart_path)
+
                 print(f"Combined radar chart downloaded to: {local_combined_radar_chart_path}")
 
+
+
         if session_id:
+
             try:
+
                 # Need to get the experiment run object if it was created
+
                 # This logic might need refinement if multiple metric types create multiple runs
+
                 # For now, assume last 'experiment_run' is the one to log to.
+
                 # if 'experiment_run' in locals():
+
                 #     experiment_run.log_params({'session_id': session_id})
+
                 pass # Added pass to keep block valid
+
             except Exception as e:
+
                 print(f"Could not log session_id to experiment run: {e}")
 
 
+
+
+
     if simple_df is not None and not simple_df.empty:
+
         simple_metrics = ["fluency", "coherence", "safety", "rouge", "bleu"]
+
         
+
         # --- Apply same fix for simple_df ---
+
         simple_df_cleaned = simple_df[["response", "reference", "prompt"]]
+
         simple_df_cleaned = simple_df_cleaned.replace("", np.nan)
+
         simple_df_cleaned = simple_df_cleaned.dropna(subset=["response"], how='any')
+
         
+
         if simple_df_cleaned.empty:
+
             print("Skipping simple evaluation due to empty DataFrame after dropping NaNs/empty strings.")
+
         else:
+
             simple_df_cleaned = simple_df_cleaned.reset_index(drop=True)
+
             # --- End fix ---
 
+
+
             try:
+
                 summary_metrics, metrics_df, experiment_run = _execute_evaluation_run_for_artifacts(
+
                     eval_df=simple_df_cleaned,
+
                     metric_type="simple",
+
                     run_name_suffix="-simple",
+
                     experiment_name=experiment_name,
+
                     current_time_str=current_time_str
+
                 )
+
                 if summary_metrics:
+
                     all_summary_metrics_data.append((summary_metrics, "simple"))
+
                 if metrics_df is not None:
+
                     all_metrics_dfs.append(metrics_df)
+
             except Exception as e:
+
                 print(f"Error during simple evaluation: {e}")
 
+
+
     if not all_time:
+
         save_current_timestamp()
+
     
+
     return artifacts, final_combined_df
 
 def _execute_evaluation_run_for_artifacts(
