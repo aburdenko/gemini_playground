@@ -1,5 +1,3 @@
-eval_id,user_content,reference,metric,bleu,contains_words,rouge
-entrance,How did Alice get to Wonderland?,rabbit hole,contains_words,,1.0,
-entrance_bleu,How did Alice get to Wonderland?,The rabbit hole,bleu,0.0,,
-advocate,Who was Alice's greatest advocate?,Peter Rabbit,bleu,0.0,,
-sentiment,Did Alice like Wonderland?,No,rouge,,,1.0
+invocation_id,eval_id,evalset_id,user_content,agent_response,reference,metric_type,metric_value
+1,capital_france,,What is the capital of France?,,The capital of France is Paris.,exact_match,
+2,romeo_juliet,,Who wrote Romeo and Juliet?,,William Shakespeare wrote Romeo and Juliet.,exact_match,
