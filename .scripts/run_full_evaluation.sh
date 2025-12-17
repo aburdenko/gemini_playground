@@ -26,7 +26,6 @@ fi
 # Define relative paths based on PROJECT_ROOT
 CREATE_EVALSET_SCRIPT="${SCRIPT_DIR}/create_evalset_from_csv.py"
 EVAL_AGENT_SCRIPT="${SCRIPT_DIR}/eval_agent.py"
-DEFAULT_CSV_PATH="${PROJECT_ROOT}/agents/rag-agent/eval_sets/eval_test_cases.csv"
 EVALSET_DIR="${PROJECT_ROOT}/agents/rag-agent/eval_sets"
 
 
@@ -35,8 +34,18 @@ echo "Deleting old evaluation files..."
 find "${EVALSET_DIR}" -name "generated_evalset_*.evalset.json" -delete
 find "${EVALSET_DIR}" -name "*_radar_chart_*.png" -delete
 
-# Set CSV_PATH, defaulting if not provided
-CSV_PATH="${1:-$DEFAULT_CSV_PATH}"
+# Set CSV_PATH, using argument if provided, otherwise find first .csv in directory
+if [ -n "$1" ]; then
+  CSV_PATH="$1"
+else
+  CSV_PATH=$(find "$EVALSET_DIR" -name "*.csv" -print -quit)
+fi
+
+if [ -z "$CSV_PATH" ]; then
+  echo "Error: No CSV file found in $EVALSET_DIR" >&2
+  exit 1
+fi
+
 TIMESTAMP=$(date +%Y%m%d%H%M%S)
 OUTPUT_JSON="${EVALSET_DIR}/generated_evalset_${TIMESTAMP}.evalset.json"
 

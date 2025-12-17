@@ -151,8 +151,6 @@ def get_logs_for_evaluation(
             metric_type_from_payload = ground_truth_payload.get(
                 "metric_type", "default_agent_metric"
             )
-            if metric_type_from_payload == "rouge":
-                metric_type_from_payload = "rouge/score"
 
             if user_content and agent_response:
                 agent_sessions_data.append(
@@ -380,14 +378,14 @@ def run_evaluation_and_generate_artifacts(eval_df: pd.DataFrame | None = None, a
     artifacts = []
     all_metrics_dfs = []
     all_summary_metrics_data = []
-    final_combined_df = None
+    processed_dfs_for_concat = []
 
     # Initialize GCS client once
     storage_client = storage.Client(project=PROJECT_ID)
     bucket = storage_client.bucket(BUCKET_NAME.replace("gs://", ""))
 
+    SUPPORTED_METRICS = ["bleu", "rouge", "contains_words", "simple", "MANUAL"]
     if agent_df is not None and not agent_df.empty:
-        # Group by metric_type and run evaluation for each group
         def get_metric_type(gt):
             if isinstance(gt, dict):
                 return gt.get("metric_type")
@@ -396,6 +394,14 @@ def run_evaluation_and_generate_artifacts(eval_df: pd.DataFrame | None = None, a
         agent_df['metric_type'] = agent_df["ground_truth"].apply(get_metric_type)
         
         for metric_type, group_df_original in agent_df.groupby('metric_type'):
+            if metric_type not in SUPPORTED_METRICS:
+                error_message = f"Invalid metric_type: '{metric_type}'. Supported types: {', '.join(SUPPORTED_METRICS)}"
+                print(error_message)
+                invalid_df = group_df_original.copy()
+                invalid_df['metric_value'] = error_message
+                processed_dfs_for_concat.append(invalid_df)
+                continue
+
             if not metric_type:
                 print(f"Skipping evaluation for {len(group_df_original)} rows with no metric_type.")
                 continue
@@ -408,10 +414,9 @@ def run_evaluation_and_generate_artifacts(eval_df: pd.DataFrame | None = None, a
             group_df = group_df_original[["response", "reference", "session_id", "prompt"]]
             
             # Replace empty strings with NaN so dropna works on them
-            # The SDK requires non-empty strings for both fields for metrics like 'bleu'
             group_df = group_df.replace("", np.nan)
 
-            # Drop rows where *either* response or reference is missing (NaN)
+            # Drop rows where *either* response or reference is missing
             group_df = group_df.dropna(subset=["response", "reference"], how='any')
 
 
@@ -423,22 +428,6 @@ def run_evaluation_and_generate_artifacts(eval_df: pd.DataFrame | None = None, a
             # a standard 0-based sequential index. reset_index fixes this.
             group_df = group_df.reset_index(drop=True)
 
-
-            if metric_type == "contains_words":
-                metrics_to_apply = [CustomMetric(name="contains_words", metric_function=_contains_words_metric_function)]
-            elif metric_type == "bleu":
-                metrics_to_apply = ["bleu"]
-            elif metric_type == "rouge":
-                metrics_to_apply = ["rouge"]
-            elif metric_type == "simple": # Handle the 'simple' case
-                metrics_to_apply = ["fluency", "coherence", "safety"]
-                # Only add ROUGE and BLEU if there are non-empty references
-                if not group_df["reference"].replace('', np.nan).dropna().empty:
-                    metrics_to_apply.extend(["rouge", "bleu"])
-            else:
-                metrics_to_apply = ["fluency", "rouge"]
-
-
             try:
                 summary_metrics, metrics_df, experiment_run = _execute_evaluation_run_for_artifacts(
                     group_df,
@@ -449,13 +438,10 @@ def run_evaluation_and_generate_artifacts(eval_df: pd.DataFrame | None = None, a
                 )
             except Exception as e:
                 print(f"Error during evaluation for metric_type {metric_type}: {e}")
-                print("Continuing to next metric type...")
-                continue # Skip to the next metric
-
-
-            # session_id is already in metrics_df if it was in group_df_original
-            # No need to re-add it here.
-
+                error_df = group_df_original[['session_id', 'metric_type']].copy()
+                error_df['metric_value'] = f"Error during evaluation: {e}"
+                processed_dfs_for_concat.append(error_df)
+                continue
 
 
             if summary_metrics:
@@ -468,70 +454,84 @@ def run_evaluation_and_generate_artifacts(eval_df: pd.DataFrame | None = None, a
                 all_metrics_dfs.append(metrics_df)
             elif metrics_df is not None:
                 print(f"Metrics DataFrame generated for {metric_type}, but 'session_id' column not found. Skipping for combined CSV.")
-
-
-
+    
     if all_metrics_dfs:
-        # Create a list to hold processed dataframes for concatenation
-        processed_dfs_for_concat = []
         for df in all_metrics_dfs:
             if df.empty or 'metric_type' not in df.columns:
                 continue
             current_metric_type = df['metric_type'].iloc[0]
-            score_cols = [col for col in df.columns if col not in ['session_id', 'response', 'reference', 'metric_type', 'prompt', 'conversation', 'ground_truth']]
+            
+            if current_metric_type == 'simple':
+                # Handle multiple scores for 'simple' metric
+                score_cols = [col for col in df.columns if '/score' in col]
+                if score_cols:
+                    temp_df = df[['session_id']].copy()
+                    # Concatenate all scores into a single string
+                    temp_df['metric_value'] = df[score_cols].apply(
+                        lambda row: ', '.join([f'{col}: {val}' for col, val in row.items()]), axis=1
+                    )
+                    temp_df['metric_type'] = current_metric_type
+                    processed_dfs_for_concat.append(temp_df)
 
-
-            if score_cols:
-                # Create a new DataFrame with session_id and all score columns
-                temp_df = df[['session_id'] + score_cols].copy()
+            else:
+                score_col = None
+                if f'{current_metric_type}/score' in df.columns:
+                    score_col = f'{current_metric_type}/score'
+                elif current_metric_type in df.columns:
+                    score_col = current_metric_type
+                else: # Find first score column
+                    for col in df.columns:
+                        if '/score' in col:
+                            score_col = col
+                            break
                 
-                # Melt the DataFrame to convert score columns into metric_type and metric_value
-                melted_df = temp_df.melt(id_vars=['session_id'], var_name='metric_type', value_name='metric_value')
-                
-                processed_dfs_for_concat.append(melted_df)
+                if score_col:
+                    temp_df = df[['session_id']].copy()
+                    temp_df['metric_value'] = df[score_col]
+                    temp_df['metric_type'] = current_metric_type
+                    processed_dfs_for_concat.append(temp_df)
 
-
-
-        if processed_dfs_for_concat:
-            final_combined_df = pd.concat(processed_dfs_for_concat, ignore_index=True)
-            # Reorder columns for clarity
+    if processed_dfs_for_concat:
+        final_combined_df = pd.concat(processed_dfs_for_concat, ignore_index=True)
+        if not final_combined_df.empty:
             final_combined_df = final_combined_df[['session_id', 'metric_type', 'metric_value']]
+    else:
+        final_combined_df = pd.DataFrame(columns=['session_id', 'metric_type', 'metric_value'])
+
+    if all_summary_metrics_data:
+        combined_radar_chart_base64 = generate_radar_chart(all_summary_metrics_data, current_time_str)
+        if combined_radar_chart_base64:
+            combined_radar_chart_filename = f"all_metrics_radar_chart_{current_time_str}.png"
+            blob = bucket.blob(f"evaluation_artifacts/combined/{combined_radar_chart_filename}")
+            blob.upload_from_string(base64.b64decode(combined_radar_chart_base64), content_type="image/png")
+            gcs_uri = f"gs://{bucket.name}/{blob.name}"
+            artifacts.append({
+                'id': 'all_metrics_radar_chart',
+                'versionId': current_time_str,
+                'mimeType': 'image/png',
+                'gcsUrl': gcs_uri,
+                'data': 'data:image/png;base64,' + combined_radar_chart_base64
+            })
+            print(f"Combined radar chart uploaded to: {gcs_uri}")
 
 
-        if all_summary_metrics_data:
-            combined_radar_chart_base64 = generate_radar_chart(all_summary_metrics_data, current_time_str)
-            if combined_radar_chart_base64:
-                combined_radar_chart_filename = f"all_metrics_radar_chart_{current_time_str}.png"
-                blob = bucket.blob(f"evaluation_artifacts/combined/{combined_radar_chart_filename}")
-                blob.upload_from_string(base64.b64decode(combined_radar_chart_base64), content_type="image/png")
-                gcs_uri = f"gs://{bucket.name}/{blob.name}"
-                artifacts.append({
-                    'id': 'all_metrics_radar_chart',
-                    'versionId': current_time_str,
-                    'mimeType': 'image/png',
-                    'gcsUrl': gcs_uri,
-                    'data': 'data:image/png;base64,' + combined_radar_chart_base64
-                })
-                print(f"Combined radar chart uploaded to: {gcs_uri}")
-
-
-                eval_sets_dir = os.path.join(os.path.dirname(__file__), '..', 'agents', 'rag-agent', 'eval_sets')
-                local_combined_radar_chart_path = os.path.join(eval_sets_dir, combined_radar_chart_filename)
-                blob.download_to_filename(local_combined_radar_chart_path)
-                print(f"Combined radar chart downloaded to: {local_combined_radar_chart_path}")
+            eval_sets_dir = os.path.join(os.path.dirname(__file__), '..', 'agents', 'rag-agent', 'eval_sets')
+            local_combined_radar_chart_path = os.path.join(eval_sets_dir, combined_radar_chart_filename)
+            blob.download_to_filename(local_combined_radar_chart_path)
+            print(f"Combined radar chart downloaded to: {local_combined_radar_chart_path}")
 
 
 
-        if session_id:
-            try:
-                # Need to get the experiment run object if it was created
-                # This logic might need refinement if multiple metric types create multiple runs
-                # For now, assume last 'experiment_run' is the one to log to.
-                # if 'experiment_run' in locals():
-                #     experiment_run.log_params({'session_id': session_id})
-                pass # Added pass to keep block valid
-            except Exception as e:
-                print(f"Could not log session_id to experiment run: {e}")
+    if session_id:
+        try:
+            # Need to get the experiment run object if it was created
+            # This logic might need refinement if multiple metric types create multiple runs
+            # For now, assume last 'experiment_run' is the one to log to.
+            # if 'experiment_run' in locals():
+            #     experiment_run.log_params({'session_id': session_id})
+            pass # Added pass to keep block valid
+        except Exception as e:
+            print(f"Could not log session_id to experiment run: {e}")
 
 
 
@@ -591,20 +591,21 @@ def _execute_evaluation_run_for_artifacts(
     full_judgement_model_name = f"projects/{PROJECT_ID}/locations/{LOCATION}/publishers/google/models/{JUDGEMENT_MODEL_NAME}"
     autorater_config = AutoraterConfig(autorater_model=full_judgement_model_name)
 
-    metrics_to_apply = []
     if metric_type == "contains_words":
         metrics_to_apply = [CustomMetric(name="contains_words", metric_function=_contains_words_metric_function)]
     elif metric_type == "bleu":
         metrics_to_apply = ["bleu"]
     elif metric_type == "rouge":
         metrics_to_apply = ["rouge"]
-    elif metric_type == "simple": # Handle the 'simple' case
+    elif metric_type == "simple":
         metrics_to_apply = ["fluency", "coherence", "safety"]
-        # Only add ROUGE and BLEU if there are non-empty references
         if not eval_df["reference"].replace('', np.nan).dropna().empty:
             metrics_to_apply.extend(["rouge", "bleu"])
     else:
-        metrics_to_apply = ["fluency", "rouge"]
+        # Default or unrecognized metrics can be handled here
+        # For now, we'll assume the metric_type is a valid, single metric string.
+        metrics_to_apply = [metric_type]
+
 
 
     eval_task = EvalTask(
@@ -617,11 +618,6 @@ def _execute_evaluation_run_for_artifacts(
         experiment_run_name=run_name
     )
     
-    # Add metric_type to the metrics_table before returning
-    # metrics_table = evaluation_result.metrics_table
-    # if metrics_table is not None:
-    #     metrics_table['metric_type'] = metric_type
-
     return evaluation_result.summary_metrics, evaluation_result.metrics_table, None
 
 def main():
@@ -798,15 +794,7 @@ def main():
                     except pd.errors.EmptyDataError:
                         print(f"Output CSV file at {args.output_csv_path} is empty. A new one will be created.")
 
-                    # Standardize metric_type in original_df_from_csv to match evaluation output conventions
-                    if not original_df_from_csv.empty:
-                        def standardize_metric_type_for_old_data(metric_type_val):
-                            if metric_type_val == 'rouge':
-                                return 'rouge/score'
-                            if metric_type_val == 'default_agent_metric':
-                                return 'default_agent_metric/score'
-                            return metric_type_val
-                        original_df_from_csv['metric_type'] = original_df_from_csv['metric_type'].apply(standardize_metric_type_for_old_data)
+
                     
                     # Prepare new evaluation results (final_combined_df)
                     final_results = final_combined_df.rename(columns={'session_id': 'eval_id'})
@@ -843,30 +831,33 @@ def main():
                     
                     # Consolidate existing data with new results
                     if not original_df_from_csv.empty:
-                        # Identify the key columns for merging
-                        merge_keys = ['eval_id', 'eval_set_id', 'metric_type']
+                        merge_keys = ['eval_id', 'metric_type']
+                        if 'eval_set_id' in original_df_from_csv.columns and 'eval_set_id' in new_results_with_content.columns:
+                            merge_keys.append('eval_set_id')
 
-                        # Perform an outer merge to combine all data
-                        merged_output_df = pd.merge(
-                            original_df_from_csv,
-                            new_results_with_content,
-                            on=merge_keys,
-                            how='outer',
-                            suffixes=('_old', '')
-                        )
+                        # Drop duplicates before setting index
+                        original_df_from_csv.drop_duplicates(subset=merge_keys, keep='last', inplace=True)
+                        new_results_with_content.drop_duplicates(subset=merge_keys, keep='last', inplace=True)
 
-                        # Prioritize the new metric_value and content columns
-                        for col in ['metric_value', 'user_content', 'agent_response', 'reference']:
-                            if f'{col}_old' in merged_output_df.columns:
-                                merged_output_df[col] = merged_output_df[col].fillna(merged_output_df[f'{col}_old'])
-                                merged_output_df.drop(columns=[f'{col}_old'], inplace=True)
+                        # Set index for both dataframes for easy update
+                        original_df_from_csv.set_index(merge_keys, inplace=True)
+                        new_results_with_content.set_index(merge_keys, inplace=True)
+
+                        # Replace empty string with NaN so that update works
+                        original_df_from_csv['metric_value'] = original_df_from_csv['metric_value'].replace('', np.nan)
+
+                        # Update original_df with new results. This will overwrite existing rows.
+                        original_df_from_csv.update(new_results_with_content)
+
+                        # Identify new rows that were not in the original DataFrame
+                        new_rows = new_results_with_content[~new_results_with_content.index.isin(original_df_from_csv.index)]
+
+                        # Reset index to get columns back
+                        original_df_from_csv.reset_index(inplace=True)
                         
-                        # Fill any remaining NaNs (e.g., in newly introduced content columns from old data)
-                        merged_output_df = merged_output_df.fillna('')
+                        # Concatenate updated original data with brand new rows
+                        merged_output_df = pd.concat([original_df_from_csv, new_rows.reset_index()], ignore_index=True)
 
-                        # Drop duplicates if any, keeping the last one (newest result)
-                        merged_output_df.drop_duplicates(subset=merge_keys, keep='last', inplace=True)
-                        
                     else:
                         # If original CSV was empty, just use the new results
                         merged_output_df = new_results_with_content

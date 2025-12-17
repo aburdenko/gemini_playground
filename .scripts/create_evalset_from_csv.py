@@ -4,19 +4,27 @@ import argparse
 
 def create_evalset_from_csv(csv_path, json_path):
     eval_cases = []
+    eval_set_id = "generated_from_csv"  # Default
     with open(csv_path, 'r') as csvfile:
         reader = csv.DictReader(csvfile)
-        for row in reader:
+        rows = list(reader)
+        if rows:
+            # Check if 'eval_set_id' column exists
+            if 'eval_set_id' in rows[0]:
+                eval_set_id = rows[0].get("eval_set_id", eval_set_id)
+
+        for row in rows:
             eval_cases.append({
                 "eval_id": row["eval_id"],
-                "eval_set_id": row["eval_id"], # Use eval_id as eval_set_id
-                                        "conversation": [
-                                            {
-                                                "invocation_id": f"e-{row['eval_id']}",
-                                                "user_content": {"parts": [{"text": row["user_content"]}]},
-                                                "final_response": {"parts": [{"text": row["agent_response"]}]}
-                                            }
-                                        ],                "session_input": {
+                "eval_set_id": row.get("eval_set_id", eval_set_id),
+                "conversation": [
+                    {
+                        "invocation_id": f"e-{row['eval_id']}",
+                        "user_content": {"parts": [{"text": row["user_content"]}]},
+                        "final_response": {"parts": [{"text": row["agent_response"]}]}
+                    }
+                ],
+                "session_input": {
                     "app_name": "rag-agent",
                     "user_id": "test_user"
                 },
@@ -36,7 +44,7 @@ def create_evalset_from_csv(csv_path, json_path):
             eval_cases[-1]["ground_truth"] = ground_truth
 
     eval_set = {
-        "eval_set_id": "generated_from_csv",
+        "eval_set_id": eval_set_id,
         "eval_cases": eval_cases
     }
 
