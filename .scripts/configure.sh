@@ -254,23 +254,29 @@ fi
 # Define a function to start the ADK web server.
 # This function checks for the correct authenticated user before launching.
 adkweb() {
-  # Check if GCP_USER_ACCOUNT is set from the .env file
-  if [ -z "$GCP_USER_ACCOUNT" ]; then
-    echo "Error: GCP_USER_ACCOUNT is not set in your .env file." >&2
-    return 1
-  fi
+  # First check if we have a valid service account configured
+  if [ -n "$GOOGLE_APPLICATION_CREDENTIALS" ] && [ -f "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
+    echo "Using Service Account defined in GOOGLE_APPLICATION_CREDENTIALS for adkweb."
+    echo "Skipping interactive user authentication."
+  else
+    # Check if GCP_USER_ACCOUNT is set from the .env file
+    if [ -z "$GCP_USER_ACCOUNT" ]; then
+      echo "Error: GCP_USER_ACCOUNT is not set in your .env file." >&2
+      return 1
+    fi
 
-  # Get the currently active gcloud account
-  local current_user
-  current_user=$(gcloud auth list --filter=status:ACTIVE --format="value(account)")
+    # Get the currently active gcloud account
+    local current_user
+    current_user=$(gcloud auth list --filter=status:ACTIVE --format="value(account)")
 
-  if [ "$current_user" != "$GCP_USER_ACCOUNT" ]; then
-    echo "WARNING: You are currently authenticated as '$current_user'."
-    echo "The ADK web server requires you to be '$GCP_USER_ACCOUNT'."
+    if [ "$current_user" != "$GCP_USER_ACCOUNT" ]; then
+      echo "WARNING: You are currently authenticated as '$current_user'."
+      echo "The ADK web server requires you to be '$GCP_USER_ACCOUNT'."
 
-    # Use 'application-default login' to set the credentials that libraries like ADK use.
-    echo "Updating Application Default Credentials. Please log in as '$GCP_USER_ACCOUNT' in the browser."
-    gcloud auth application-default login --project="$PROJECT_ID" --scopes="https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/userinfo.email,openid" || return 1
+      # Use 'application-default login' to set the credentials that libraries like ADK use.
+      echo "Updating Application Default Credentials. Please log in as '$GCP_USER_ACCOUNT' in the browser."
+      gcloud auth application-default login --project="$PROJECT_ID" --scopes="https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/userinfo.email,openid" || return 1
+    fi
   fi
 
   # Display the browser identity warning BEFORE starting the blocking server process.
@@ -327,3 +333,19 @@ adkweb() {
 }
 
 export PATH=$PATH:$HOME/.local/bin:.scripts
+
+uv tool install agent-starter-pack
+
+(type -p wget >/dev/null || (sudo apt update && sudo apt install wget -y)) \
+        && sudo apt update && sudo apt install xvfb libxkbcommon0 -y \
+        && sudo mkdir -p -m 755 /etc/apt/keyrings \
+        && out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+        && cat $out | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+        && sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+        && sudo mkdir -p -m 755 /etc/apt/sources.list.d \
+        && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+        && sudo apt update \
+        && sudo apt install gh -y
+
+unset GOOGLE_API_KEY GEMINI_API_KEY
+alias gemini="gemini -m $GEMINI_MODEL_NAME --yolo"
