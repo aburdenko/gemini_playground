@@ -4,6 +4,7 @@ import string
 import random
 import logging
 import subprocess
+import shutil
 from google.adk.tools import ToolContext
 from typing import Optional, List, Dict, Any
 
@@ -47,6 +48,30 @@ def interactive_visualization_generator(
         
         safe_viz_type = "".join([c for c in viz_type.lower() if c.isalnum()])[:10]
         
+        # Check if URL is overridden in environment variables
+        env_var_name = f"VIZ_{safe_viz_type.upper()}_URL"
+        override_url = os.getenv(env_var_name)
+        
+        if override_url:
+            logging.info(f"Using pre-deployed visualization URL from {env_var_name}: {override_url}")
+            return {
+                "status": "success",
+                "url": override_url,
+                "message": f"Using pre-deployed visualization URL from {env_var_name}"
+            }
+        
+
+        # Ensure gcloud is available (especially in Cloud Run)
+        if not shutil.which("gcloud"):
+            logging.info("gcloud not found in PATH. Downloading Google Cloud SDK to /tmp...")
+            install_dir = "/tmp/google-cloud-sdk"
+            if not os.path.exists(install_dir):
+                subprocess.run(
+                    "curl -sSL https://sdk.cloud.google.com | bash -s -- --install-dir=/tmp --disable-prompts > /dev/null 2>&1",
+                    shell=True, check=True
+                )
+            os.environ["PATH"] += f":{install_dir}/bin"
+
         # Get project number to form predictable URL
         try:
             result = subprocess.run(
@@ -56,6 +81,9 @@ def interactive_visualization_generator(
             project_number = result.stdout.strip()
         except subprocess.CalledProcessError as e:
             logging.error(f"Failed to get project number: {e}")
+            project_number = "UNKNOWN"
+        except FileNotFoundError as e:
+            logging.error(f"gcloud not found when getting project number: {e}")
             project_number = "UNKNOWN"
 
         random_suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=5))
@@ -463,6 +491,10 @@ def render_timeline(state):
 
     except subprocess.CalledProcessError as e:
         error_msg = f"Build submission failed: {e.stderr if e.stderr else e}"
+        logging.error(error_msg)
+        return {"status": "error", "error_message": error_msg}
+    except FileNotFoundError as e:
+        error_msg = f"Missing required system dependency (e.g. gcloud): {e}"
         logging.error(error_msg)
         return {"status": "error", "error_message": error_msg}
     except Exception as e:
