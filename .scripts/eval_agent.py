@@ -20,11 +20,11 @@ from vertexai.preview.evaluation import AutoraterConfig, CustomMetric, EvalTask
 matplotlib.use("Agg")
 
 
-# Add the 'rag-agent' directory to the Python path
+# Add the 'travel-concierge' directory to the Python path
 sys.path.insert(
     0,
     os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..", "agents", "rag-agent")
+        os.path.join(os.path.dirname(__file__), "..", "agents", "travel-concierge")
     ),
 )
 
@@ -211,7 +211,7 @@ def export_sessions_to_evalset(last_run_timestamp: str | None):
         return
 
     output_dir = os.path.join(
-        os.path.dirname(__file__), "..", "agents", "rag-agent", "eval_sets"
+        os.path.dirname(__file__), "..", "agents", "travel-concierge", "eval_sets"
     )
     os.makedirs(output_dir, exist_ok=True)
     print(
@@ -255,7 +255,7 @@ def export_sessions_to_evalset(last_run_timestamp: str | None):
                 }]
             }
             output_filename = os.path.join(
-                output_dir, f"rag-agent.evalset.{session_id}.json"
+                output_dir, f"travel-concierge.evalset.{session_id}.json"
             )
             with open(output_filename, "w") as f:
                 json.dump(eval_set, f, indent=2)
@@ -293,7 +293,7 @@ def export_sessions_to_evalset(last_run_timestamp: str | None):
                 }]
             }
             output_filename = os.path.join(
-                output_dir, f"rag-agent.evalset.{request_id}.json"
+                output_dir, f"travel-concierge.evalset.{request_id}.json"
             )
             with open(output_filename, "w") as f:
                 json.dump(eval_set, f, indent=2)
@@ -515,7 +515,7 @@ def run_evaluation_and_generate_artifacts(eval_df: pd.DataFrame | None = None, a
             print(f"Combined radar chart uploaded to: {gcs_uri}")
 
 
-            eval_sets_dir = os.path.join(os.path.dirname(__file__), '..', 'agents', 'rag-agent', 'eval_sets')
+            eval_sets_dir = os.path.join(os.path.dirname(__file__), '..', 'agents', 'travel-concierge', 'eval_sets')
             local_combined_radar_chart_path = os.path.join(eval_sets_dir, combined_radar_chart_filename)
             blob.download_to_filename(local_combined_radar_chart_path)
             print(f"Combined radar chart downloaded to: {local_combined_radar_chart_path}")
@@ -685,7 +685,7 @@ def main():
             # Drop any rows where all essential columns are empty, just in case
             df_to_export.dropna(subset=["user_content", "agent_response"], how='all', inplace=True)
 
-            output_path = os.path.join(os.path.dirname(__file__), '..', 'agents', 'rag-agent', 'eval_sets', 'eval_test_cases.csv')
+            output_path = os.path.join(os.path.dirname(__file__), '..', 'agents', 'travel-concierge', 'eval_sets', 'eval_test_cases.csv')
             df_to_export.to_csv(output_path, index=False)
             print(f"Successfully exported logs to {output_path}")
         else:
@@ -743,7 +743,7 @@ def main():
                             "ground_truth": ground_truth
                         })
         else:
-            eval_sets_dir = os.path.join(os.path.dirname(__file__), '..', 'agents', 'rag-agent', 'eval_sets')
+            eval_sets_dir = os.path.join(os.path.dirname(__file__), '..', 'agents', 'travel-concierge', 'eval_sets')
             for filepath in glob.glob(os.path.join(eval_sets_dir, "**", "*.evalset.json"), recursive=True):
                 if not os.path.isfile(filepath): # Filter out directories
                     print(f"Skipping directory: {os.path.basename(filepath)}")

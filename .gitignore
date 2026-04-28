@@ -11,3 +11,5 @@ agents/rag-agent/eval_sets/*.png
 agents/**/*.json
 prompts/**/*.output.md
 last_run_timestamp.txt
+.env
+agents/.backup_*

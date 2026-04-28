@@ -1,0 +1,7 @@
+{
+  "general": 
+  {
+    "previewFeatures": true
+    , "ui.truncateToolDescriptions": false
+  }
+}

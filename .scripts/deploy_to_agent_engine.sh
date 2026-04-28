@@ -36,9 +36,16 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
+# --- Create agent if it doesn't exist ---
+if [ ! -d "agents/$AGENT_NAME" ]; then
+    echo "Agent '$AGENT_NAME' not found. Creating it..."
+    uvx agent-starter-pack create $AGENT_NAME -d agent_engine -a adk@RAG
+    (cd agents/$AGENT_NAME && make install)
+fi
+
 # --- Create requirements.txt ---
 echo "Generating requirements.txt..."
-(cd agents/rag-agent && uv export --no-hashes --no-header --no-dev --no-emit-project --no-annotate > .requirements.txt)
+(cd agents/rag-agent && uv export --no-hashes --no-header --no-dev --no-emit-project --no-annotate | grep -E '^(google-adk|google-cloud-aiplatform|pydantic|uvicorn|fastapi)' > .requirements.txt)
 
 # --- Build the deployment command ---
 CMD="uv run agents/rag-agent/app/agent_engine_app.py \

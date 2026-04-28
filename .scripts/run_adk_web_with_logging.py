@@ -4,9 +4,16 @@ import os
 import sys
 import uvicorn
 import logging as python_logging
+from dotenv import load_dotenv
+
+# Force load the root .env file and override any stuck environment variables in the user's terminal
+root_env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env')
+if os.path.exists(root_env_path):
+    load_dotenv(root_env_path, override=True)
 
 # Add rag-agent to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'agents', 'rag-agent')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'agents', 'travel_concierge')))
 
 import google.auth
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -110,6 +117,9 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         else:
             # If the path does not match, just pass the request through
             return await call_next(request)
+
+# Set scenario path for travel_concierge
+os.environ["TRAVEL_CONCIERGE_SCENARIO"] = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'agents', 'travel_concierge', 'travel_concierge', 'profiles', 'itinerary_empty_default.json'))
 
 # --- App Initialization ---
 # We no longer need to set up logging here; it will be passed to uvicorn.run()
