@@ -39,6 +39,30 @@ fi
 # then exports the remaining VAR=value pairs.
 export $(grep -v '^#' "$ENV_FILE" | sed 's/#.*//' | xargs)
 
+# Fix non-existent credential paths in .env for portability (e.g. on Cloud Shell or macOS)
+python3 -c "
+import os
+env_file = '$ENV_FILE'
+if os.path.exists(env_file):
+    with open(env_file, 'r') as f:
+        lines = f.readlines()
+    changed = False
+    for i, line in enumerate(lines):
+        if line.startswith('SERVICE_ACCOUNT_KEY_FILE=') or line.startswith('GOOGLE_APPLICATION_CREDENTIALS='):
+            parts = line.split('=', 1)
+            val = parts[1].strip().strip('\"').strip('\'')
+            if val and not os.path.exists(val):
+                print(f'Unsetting invalid {parts[0]} path: {val}')
+                lines[i] = f'{parts[0]}=\"\"\n'
+                changed = True
+    if changed:
+        with open(env_file, 'w') as f:
+            f.writelines(lines)
+"
+
+# Re-read and export after potential automatic fixes
+export $(grep -v '^#' "$ENV_FILE" | sed 's/#.*//' | xargs)
+
 # --- Git User Configuration ---
 # Set git user.name and user.email if they are defined in the .env file.
 if [ -n "$GIT_USER_NAME" ] && [ -n "$GIT_USER_EMAIL" ]; then
