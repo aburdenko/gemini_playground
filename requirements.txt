@@ -14,3 +14,4 @@ fsspec
 tabulate
 PyYAML
 opentelemetry-exporter-gcp-trace
+python-multipart
