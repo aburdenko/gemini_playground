@@ -11,6 +11,12 @@ root_env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__f
 if os.path.exists(root_env_path):
     load_dotenv(root_env_path, override=True)
 
+# If GOOGLE_APPLICATION_CREDENTIALS is set but the file does not exist, unset it to avoid auth crashes
+gac = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
+if gac and not os.path.exists(gac):
+    print(f"WARNING: GOOGLE_APPLICATION_CREDENTIALS file not found: {gac}. Unsetting to allow fallback authentication.", flush=True)
+    os.environ.pop("GOOGLE_APPLICATION_CREDENTIALS", None)
+
 # Add rag-agent to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'agents', 'rag-agent')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'agents', 'travel_concierge')))
