@@ -1,0 +1,11 @@
+steps:
+  - name: 'python:3.10'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        pip install uv
+        uv venv
+        uv pip install -r "agents/rag-agent/.requirements.txt"
+        uv run agents/rag-agent/app/agent_engine_app.py         --project kallogjeri-project-345114         --location us-central1         --agent-name rag-agent         --requirements-file agents/rag-agent/.requirements.txt         --extra-packages agents/rag-agent/app
+timeout: 3600s

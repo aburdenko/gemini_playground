@@ -166,8 +166,10 @@ async def lifespan(app: FastAPI):
 app = get_fast_api_app(
     agents_dir=os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'agents')),
     web=True,
+    allow_origins=["*"],
     lifespan=lifespan,
 )
+
 app.add_middleware(LoggingMiddleware)
 
 if __name__ == "__main__":

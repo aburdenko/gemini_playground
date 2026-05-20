@@ -129,13 +129,8 @@ def deploy_agent_engine_app(
     staging_bucket_uri: str | None,
     artifacts_bucket_name: str | None,
 ) -> AgentEngine:
-    """Deploy the agent engine app to Vertex AI."""
-
-    logging.basicConfig(level=logging.INFO)
-
-    # Parse environment variables if provided
+    """Deploys the agent engine app to Vertex AI."""
     env_vars = parse_env_vars(set_env_vars)
-
     if not project:
         _, project = google.auth.default()
     if not staging_bucket_uri:
@@ -185,14 +180,13 @@ def deploy_agent_engine_app(
 
     config = AgentEngineConfig(
         display_name=agent_name,
-        description="ADK RAG agent for document retrieval and Q&A. Includes a data pipeline for ingesting and indexing documents into Vertex AI Search or Vector Search.",
+        description="ADK RAG agent",
         extra_packages=extra_packages_list,
         env_vars=env_vars,
         service_account=service_account,
         requirements=requirements,
         staging_bucket=staging_bucket_uri,
         labels=labels,
-        gcs_dir_name=agent_name,
     )
 
     agent_config = {
@@ -200,6 +194,7 @@ def deploy_agent_engine_app(
         "config": config,
     }
     logging.info(f"Agent config: {agent_config}")
+    print(f"Agent config: {agent_config}")
 
     # Check if an agent with this name already exists
     existing_agents = list(client.agent_engines.list())
@@ -212,13 +207,21 @@ def deploy_agent_engine_app(
     if matching_agents:
         # Update the existing agent with new configuration
         logging.info(f"\n📝 Updating existing agent: {agent_name}")
-        remote_agent = client.agent_engines.update(
-            name=matching_agents[0].api_resource.name, **agent_config
-        )
+        try:
+            remote_agent = client.agent_engines.update(
+                name=matching_agents[0].api_resource.name, **agent_config
+            )
+        except Exception as e:
+            logging.error(f"Failed to update agent: {e}")
+            raise
     else:
         # Create a new agent if none exists
         logging.info(f"\n🚀 Creating new agent: {agent_name}")
-        remote_agent = client.agent_engines.create(**agent_config)
+        try:
+            remote_agent = client.agent_engines.create(**agent_config)
+        except Exception as e:
+            logging.error(f"Failed to create agent: {e}")
+            raise
 
     write_deployment_metadata(remote_agent)
     print_deployment_success(remote_agent, location, project)

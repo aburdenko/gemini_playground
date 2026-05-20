@@ -1,122 +1,91 @@
 ---
 name: coscientist-enterprise
-description: Guidance and commands for interacting with the Co-Scientist Enterprise CLI via the v1alpha API (Discovery Engine). Use this when starting, monitoring, testing Co-Scientist instances, or working with EnterpriseApiService direct targets.
+description: Guidance and commands for interacting with Co-Scientist via the v1alpha API (Discovery Engine). Use this when starting, monitoring, or testing Co-Scientist instances via REST API endpoints.
 ---
 
 # 1. Get an access token using standard gcloud
 TOKEN=$(gcloud auth application-default print-access-token)
 
-# 2. Call the Discovery Engine API endpoint directly via curl
-curl -X GET \
-    -H "Authorization: Bearer $TOKEN" \
-    -H "X-Goog-User-Project: YOUR_PROJECT_NUMBER" \
-    "https://discoveryengine.googleapis.com/v1alpha/projects/YOUR_PROJECT_NUMBER/locations/global/collections/default_collection/engines"
+# 2. Call the Discovery Engine API endpoints directly
 
-## Co-Scientist Enterprise CLI
+## Co-Scientist REST API
 
-This directory contains a script to programmatically start and monitor a Co-Scientist session via the v1alpha API (Discovery Engine v1alpha endpoints).
+This document provides instructions on how to programmatically start and monitor a Co-Scientist session via the v1alpha API (Discovery Engine v1alpha endpoints) using standard HTTP requests.
 
-To run it, you must have the Discovery Engine User IAM role on the GCP project and provide your PROJECT_NUMBER and APP_ID. Since Co-Scientist instances can take a while to finish, this script behaves as a two-stage CLI tool so you don't need to leave a local process running.
+To interact with these endpoints, you must have the Discovery Engine User IAM role on the GCP project and provide your `PROJECT_NUMBER` and `APP_ID`. Since Co-Scientist instances can take a while to finish, the typical flow involves starting the generation and polling the session later.
 
-### 1. Start a Session
-To start an instance, run the client with the `--command=start` flag (or omit the command flag, as start is the default). Make sure you specify where to save the state file.
+### 1. Create a Session
+Before triggering a generation, you must create a new conversational session within your engine.
 
 ```bash
-blaze run //cloud/ai/science/coscientist/dev:coscientist_enterprise_cli -- \
-    --project_number=YOUR_PROJECT_NUMBER \
-    --app_id=YOUR_APP_ID \
-    --query="Generate experimental hypotheses to cure the common cold using non-invasive techniques." \
-    --command=start \
-    --state_file=/tmp/coscientist_state.json
+curl -sS -X POST \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -H "X-Goog-User-Project: YOUR_PROJECT_NUMBER" \
+  "https://discoveryengine.googleapis.com/v1alpha/projects/YOUR_PROJECT_NUMBER/locations/global/collections/default_collection/engines/YOUR_APP_ID/sessions" \
+  -d '{"state": "IN_PROGRESS"}'
 ```
-This will run to get the initial `session_id` and `instance_id`, save them locally to your state file, and then immediately exit, letting the instance generate remotely.
+This returns a JSON object containing the `name` of the newly created session. You must extract and save this `name` for the next steps.
 
-### 2. Check the Status
-Run the script anytime via the `--command=status` flag and provide the exact same state file where you stored the initial instance parameters.
+### 2. Trigger Generation (streamAssist)
+Using the `session` name obtained above, you trigger the long-running Co-Scientist task. 
 
 ```bash
-blaze run //cloud/ai/science/coscientist/dev:coscientist_enterprise_cli -- \
-    --project_number=YOUR_PROJECT_NUMBER \
-    --app_id=YOUR_APP_ID \
-    --command=status \
-    --state_file=/tmp/coscientist_state.json
+curl -sS -X POST \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -H "X-Goog-User-Project: YOUR_PROJECT_NUMBER" \
+  "https://discoveryengine.googleapis.com/v1alpha/projects/YOUR_PROJECT_NUMBER/locations/global/collections/default_collection/engines/YOUR_APP_ID/assistants/default_assistant:streamAssist" \
+  -d '{
+    "session": "projects/YOUR_PROJECT_NUMBER/locations/global/collections/default_collection/engines/YOUR_APP_ID/sessions/YOUR_SESSION_ID",
+    "query": {
+      "text": "Generate experimental hypotheses to cure the common cold using non-invasive techniques."
+    }
+  }'
 ```
-It will reload the IDs, hit the endpoint to check the current generation state, and:
-- If the instance state is not `SUCCEEDED`, inform you that the instance is still unready.
-- If it has successfully finished, it will output the overall generated summary of the session as well as fetch and log the fully detailed data models returned for each idea successfully constructed.
+**Note:** `streamAssist` is a streaming endpoint. In some contexts, it may return immediately or stream chunks (e.g. `[{"answer": {"state": "IN_PROGRESS", "replies": [...]}}]`).
 
-## Direct EnterpriseApiService mode
-By default the CLI drives runs through OnePlatform / IdeaForgeService in prod. Use `--direct_api_target` to bypass IdeaForge and stubby-call `EnterpriseApiService` directly. Useful for testing changes in the CoScientist enterprise stack (API, worker, queue receivers, wrapper factory) against environments that have no IdeaForge deployment (e.g. autopush, or your own boq run).
+### 3. Check Status and Retrieve Results
+To check the status of an ongoing generation or retrieve the results, you typically poll the session or the specific conversational endpoints, extracting the `groundedContent` text chunks from the `replies` array in the JSON response once the state is `COMPLETED`.
 
-The CLI still creates the parent DE session via the prod OnePlatform (`createSession` + `streamAssist`), then synthesizes a fresh `coscientistInstances/<id>` resource name and stubby-calls `StartCoscientistInstance` / `GetCoscientistInstance` / `GetHypothesis` against the configured target. The session lives in prod DE Spanner regardless of the direct-stubby target, which is what `EnterpriseApiService.VerifyUserAccessToSession` reads.
+## Implementing via Python (Requests)
+When implementing agents that interact with this API, use the `requests` library to orchestrate these calls synchronously or asynchronously.
 
-`--direct_api_target` accepts:
-- `autopush-global` -- aliased to `blade:cloud_ai_coscientist.enterpriseapiservice-autopush-global`.
-- `localhost:<port>` -- for `boq run --env=dev` workflows.
-- Any raw `blade:...` BNS for ad-hoc targets (e.g. `blade:cloud_ai_coscientist.enterpriseapiservice-staging-qual-us`).
+```python
+import os
+import json
+import subprocess
+import requests
 
-The `--direct_api_target` value used at start is recorded indirectly via the synthesized `coscientist_instance_name` in the state file; the same flag must be passed on subsequent status invocations against the same instance. To check status without a state file, pass `--coscientist_instance_name=<full resource name>` (the direct-mode equivalent of `--session_id`); `--session_id` itself is only useful in OnePlatform mode where IdeaForge can resolve the instance from the session.
+def get_gcloud_token() -> str:
+    result = subprocess.run(
+        ["gcloud", "auth", "application-default", "print-access-token"],
+        capture_output=True, text=True, check=True
+    )
+    return result.stdout.strip()
 
-## Auth and policy
-The CLI mints a LOAS-derived GaiaMint EUC via `auth_utils.GaiaMintFromLoas` and attaches it on every RPC, so any corp engineer can target a deployed `cloud-ai-coscientist-enterprise-api` job. The bundle's existing `UNPRIVILEGED_USER { all_normal_users {} }` binding accepts the self-presented EUC; `axt_level: AXT_L3` is satisfied because LOAS-derived self-EUC presentation is allowed via `USE_LOAS` (go/rpcsp2-binding-evaluation#permissions-that-are-always-granted). Per-instance data access is still gated by the GCP project ACL on the parent DE session.
+# 1. Start Session
+token = get_gcloud_token()
+project_number = os.environ.get("GOOGLE_CLOUD_PROJECT")
+app_id = os.environ.get("GEMINI_ENT_APP_ID")
+session_url = f"https://discoveryengine.googleapis.com/v1alpha/projects/{project_number}/locations/global/collections/default_collection/engines/{app_id}/sessions"
 
-rpcStudio remains a useful alternative if you want to inspect or replay a call interactively.
+headers = {
+    "Authorization": f"Bearer {token}",
+    "Content-Type": "application/json",
+    "X-Goog-User-Project": project_number
+}
 
-## Testing against autopush-global
-`enterpriseapiservice-autopush-global` only serves global-region traffic; the handler returns `APP_ERROR(3) Incorrect API endpoint used`. The current endpoint can only serve traffic from "global" region if you hit it with a `us` or `eu` session. So you need a project + engine in the global location, not a CMEK engine (CMEK requires a regional location).
+session_resp = requests.post(session_url, headers=headers, json={"state": "IN_PROGRESS"})
+session_name = session_resp.json().get("name")
 
-You also need the Discovery Engine User IAM role on the project so the prod OnePlatform `createSession` + `streamAssist` calls succeed. Verify with the curl command at the top of this guide.
+# 2. Trigger streamAssist
+assist_url = f"https://discoveryengine.googleapis.com/v1alpha/projects/{project_number}/locations/global/collections/default_collection/engines/{app_id}/assistants/default_assistant:streamAssist"
+assist_payload = {
+    "session": session_name,
+    "query": {"text": "Your query here"}
+}
 
-Once that returns a non-empty engine list, start an instance:
-
-```bash
-blaze run //cloud/ai/science/coscientist/engine/enterprise/dev:coscientist_enterprise_cli -- \
-    --project_number=$PROJECT_NUMBER \
-    --app_id=$APP_ID \
-    --location=global \
-    --command=start \
-    --query="Generate experimental hypotheses to cure the common cold using non-invasive techniques." \
-    --tier=TIER0 \
-    --state_file=/tmp/coscientist_enterprise_state_autopush.json \
-    --direct_api_target=autopush-global
+response = requests.post(assist_url, headers=headers, json=assist_payload, stream=True)
+# Parse chunked JSON stream to retrieve 'groundedContent'
 ```
-A successful run logs "Instance started. Run with `--command=status` to check progress." and writes the synthesized `coscientist_instance_name` to the state file. Then poll status:
-
-```bash
-blaze run //cloud/ai/science/coscientist/engine/enterprise/dev:coscientist_enterprise_cli -- \
-    --project_number=$PROJECT_NUMBER \
-    --app_id=$APP_ID \
-    --location=global \
-    --command=status \
-    --state_file=/tmp/coscientist_enterprise_state_autopush.json \
-    --direct_api_target=autopush-global
-```
-Expected progression: `STATE_RUNNING` → `STATE_COMPLETED` (the overview and fetched ideas print on completion) or `STATE_FAILED`.
-
-## Testing against a local boq run
-For purely local development, run a `boq run --env=dev` instance and target it via `--direct_api_target=localhost:<port>`. The dev selector binds `SYSTEM=self{}` so the LOAS-only call from the local binary is accepted with no additional setup.
-
-```bash
-blaze run //cloud/ai/science/coscientist/engine/enterprise/dev:coscientist_enterprise_cli -- \
-    --project_number=$PROJECT_NUMBER \
-    --app_id=$APP_ID \
-    --query="..." \
-    --command=start \
-    --state_file=/tmp/coscientist_state.json \
-    --direct_api_target=localhost:9876
-```
-
-## Usage Flags
-
-| Flag | Default | Description |
-|---|---|---|
-| `--command` | `start` | The command to run: 'start' to start an instance and 'status' to retrieve results. |
-| `--project_number` | None | The numeric identifier for your GCP project (required). |
-| `--app_id` | None | The ID of the Agentspace app that you want to query (required). |
-| `--query` | see below | The prompt you want to run (used in start only). |
-| `--tier` | `TIER1` | Maps to `predefinedGenerationConfig.type` in the request. |
-| `--state_file` | `/tmp/coscientist_state.json` | Path to a local file to save/load instance state. |
-| `--location` | `global` | Discovery Engine location (e.g. global, us, eu). Use us or eu for CMEK-enabled engines. |
-| `--session_id` | None | Session ID to check status for, bypassing the state file (OnePlatform mode only). |
-| `--direct_api_target` | `""` | If set, bypass IdeaForgeService.StartInstance and stubby-call EnterpriseApiService directly. |
-| `--coscientist_instance_name` | None | Direct-mode equivalent of `--session_id`: a full `coscientistInstances/<id>` resource name to check status for, bypassing the state file. Requires `--direct_api_target`. |

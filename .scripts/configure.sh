@@ -13,7 +13,7 @@ if ! command -v gemini &> /dev/null; then
   echo "Gemini CLI not found. Installing the latest version ($LATEST_VERSION)..."
   sudo npm install -g @google/gemini-cli@latest
 else
-  # Extract version from `npm list`, which is more reliable than `gemini --version`
+  # Extract vergeminision from `npm list`, which is more reliable than `gemini --version`
   INSTALLED_VERSION=$(npm list -g @google/gemini-cli --depth=0 2>/dev/null | grep '@google/gemini-cli' | sed 's/.*@//')
   if [ "$INSTALLED_VERSION" == "$LATEST_VERSION" ]; then
     echo "Gemini CLI is already up to date (version $INSTALLED_VERSION)."
@@ -58,13 +58,23 @@ fi
 echo "--- Configuring Google Cloud Authentication & Project ---"
 
 # --- Step 1: Check for Service Account ---
-# The path to the service account key file should be set in the .env file.
+# Use the service account key file if specified in .env and it exists,
+# or fallback to the local service_account.json symlink/file if it exists and is a valid file.
+KEY_FILE=""
 if [ -n "$SERVICE_ACCOUNT_KEY_FILE" ] && [ -f "$SERVICE_ACCOUNT_KEY_FILE" ]; then
-  echo "Service Account key found at '$SERVICE_ACCOUNT_KEY_FILE'. Using it for authentication."
-  export GOOGLE_APPLICATION_CREDENTIALS="$SERVICE_ACCOUNT_KEY_FILE"
+  KEY_FILE="$SERVICE_ACCOUNT_KEY_FILE"
+elif [ -f "service_account.json" ]; then
+  echo "Local service_account.json found and valid. Using it for authentication."
+  export SERVICE_ACCOUNT_KEY_FILE="service_account.json"
+  KEY_FILE="service_account.json"
+fi
+
+if [ -n "$KEY_FILE" ]; then
+  echo "Service Account key found at '$KEY_FILE'. Using it for authentication."
+  export GOOGLE_APPLICATION_CREDENTIALS="$KEY_FILE"
   # If PROJECT_ID is not already set in .env, extract it from the SA key.
   if [ -z "$PROJECT_ID" ]; then
-    PROJECT_ID=$(jq -r .project_id "$SERVICE_ACCOUNT_KEY_FILE")
+    PROJECT_ID=$(jq -r .project_id "$KEY_FILE")
     if [ -z "$PROJECT_ID" ] || [ "$PROJECT_ID" == "null" ]; then
       echo "ERROR: Could not extract project_id from service account key file." >&2
       echo "Please set PROJECT_ID in your .env file." >&2
@@ -236,10 +246,28 @@ fi
 AGENT_PKG_INSTALL="google-cloud-aiplatform[rag,eval]"
 AGENT_PKG_CHECK="google-cloud-aiplatform" # pip show works on the base package name
 
-# Explicitly install the ADK package if it's not already present.
+# Explicitly install the AI Platform package if it's not already present.
 if ! ./.venv/python3.12/bin/pip show "$AGENT_PKG_CHECK" &> /dev/null; then
-  echo "Google Agent Development Kit not found. Installing..."
+  echo "Google Cloud AI Platform not found. Installing..."
   ./.venv/python3.12/bin/pip install --quiet "$AGENT_PKG_INSTALL"
+fi
+
+# --- Google ADK Installation/Update ---
+echo "Checking for the latest google-adk version..."
+LATEST_ADK_VERSION=$(curl -s https://pypi.org/pypi/google-adk/json | jq -r .info.version)
+
+if ! ./.venv/python3.12/bin/pip show google-adk &> /dev/null; then
+  echo "google-adk not found. Installing the latest version ($LATEST_ADK_VERSION)..."
+  ./.venv/python3.12/bin/pip install --quiet "google-adk[eval]==$LATEST_ADK_VERSION"
+else
+  INSTALLED_ADK_VERSION=$(./.venv/python3.12/bin/pip show google-adk 2>/dev/null | grep '^Version:' | awk '{print $2}')
+  if [ "$INSTALLED_ADK_VERSION" == "$LATEST_ADK_VERSION" ]; then
+    echo "google-adk is already up to date (version $INSTALLED_ADK_VERSION)."
+  else
+    echo "A new version of google-adk is available."
+    echo "Upgrading from version $INSTALLED_ADK_VERSION to $LATEST_ADK_VERSION..."
+    ./.venv/python3.12/bin/pip install --quiet --upgrade "google-adk[eval]==$LATEST_ADK_VERSION"
+  fi
 fi
 # This POSIX-compliant check ensures the script is sourced, not executed.
 # (return 0 2>/dev/null) will succeed if sourced and fail if executed.
@@ -349,3 +377,4 @@ uv tool install agent-starter-pack
 
 unset GOOGLE_API_KEY GEMINI_API_KEY
 alias gemini="gemini -m $GEMINI_MODEL_NAME --yolo"
+npx skills install -y -g github.com/google/skills

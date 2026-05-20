@@ -34,11 +34,12 @@ adk deploy agent_engine agents/data_viz_agent \
 
 ## 4. How to Deploy to Google Cloud Run
 If you prefer to host the agent as a standalone containerized web service (exposing a FastAPI backend), deploy to Cloud Run:
-
 ```bash
 adk deploy cloud_run agents/data_viz_agent \
     --project $PROJECT_ID \
-    --region $REGION
+    --region $REGION \
+    -- \
+    --set-env-vars="GOOGLE_GENAI_USE_VERTEXAI=True,PROJECT_ID=$PROJECT_ID,REGION=$REGION,GOOGLE_CLOUD_PROJECT=$PROJECT_ID,DATASET=$DATASET,TABLE_OR_VIEW=$TABLE_OR_VIEW,VIZ_EXPLORE_URL=$VIZ_EXPLORE_URL,VIZ_TIMELINE_URL=$VIZ_TIMELINE_URL,VIZ_MINDMAP_URL=$VIZ_MINDMAP_URL"
 ```
 This will output a Cloud Run service URL that client applications can use to interact with the agent via standard HTTP requests or the ADK REST API.
 

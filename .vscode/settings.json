@@ -13,6 +13,7 @@
         }
     },
     "terminal.integrated.defaultProfile.linux": "Project Bash",
+    "terminal.integrated.gpuAcceleration": "off",
     // --- Recommended Python Settings ---
     // Point to the project's virtual environment interpreter.
     "python.defaultInterpreterPath": "${workspaceFolder}/.venv/python3.12/bin/python",

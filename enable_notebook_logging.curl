@@ -1,0 +1,15 @@
+curl -X PATCH \
+  -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+  -H "Content-Type: application/json" \
+  -H "X-Goog-User-Project: kallogjeri-project-345114" \
+  "https://discoveryengine.googleapis.com/v1alpha/projects/273872083706?updateMask=customerProvidedConfig.notebooklmConfig.observabilityConfig" \
+  -d '{
+    "customerProvidedConfig": {
+      "notebooklmConfig": {
+        "observabilityConfig": {
+          "observabilityEnabled": true,
+          "sensitiveLoggingEnabled": true
+        }
+      }
+    }
+  }'

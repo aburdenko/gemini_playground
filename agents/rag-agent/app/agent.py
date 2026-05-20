@@ -55,5 +55,6 @@ root_agent = Agent(
     name="root_agent",
     model=LLM,
     instruction=instruction,
-    tools=[vertex_rag_tool, read_file],
+    #tools=[read_file, vertex_rag_tool],
+    tools=[vertex_rag_tool]
 )

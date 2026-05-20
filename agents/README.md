@@ -32,35 +32,21 @@ Check out the agent samples below, organized by category:
 
 | Agent Name                                  | Use Case                                                                                                                              | Tag | Interaction Type | Complexity | Agent Type   | Vertical                      |
 | :------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------- | :-: | :--------------- | :--------- | :----------- | :---------------------------- |
-| [Academic Research](academic-research) | Assists researchers in identifying recent publications and discovering emerging research areas. |   Multi-agent, Custom tool, Evaluation | Workflow | Easy | Multi Agent | Academia                        |
-| [Brand Search Optimization](brand-search-optimization) | Enrich e-commerce product data by analyzing and comparing top search results. Useful for addressing issues like "Null & low recovery" / "Zero Results" searches and identifies gaps in product data.                                 |   Multi-agent, Custom tool, BigQuery connection, Evaluation, Computer use   | Workflow | Easy | Multi Agent | Retail                        |
-| [Cymbal Home & Garden Customer Service Agent](customer-service) | Customer service, product selection, order management for home improvement, gardening, and related supplies                                |  Custom tool, Async tool, External system calls, Live streaming, Multimodal   | Conversational         | Advanced     | Single Agent       | Retail                        |
-| [Data Engineering Agent](data-engineering) | Data Engineering Agent designed for building sophisticated BigQuery and Dataform Pipelines                                                                          |  BigQuery, Dataform, ELT Pipelines, Data Curation, Data Modelling, Data Preperation, Data Ingestion, Analytics Engineering, Data Engineering   | Conversational | Advanced | Single Agent | Horizontal                    |
-| [Data Science Agent](data-science) | A multi-agent system designed for sophisticated data analysis                                                                          |  Function tool (Python), Agent tool, NL2SQL, Structured data, Database   | Conversational | Advanced | Multi Agent | Horizontal                    |
-| [Financial Advisor](financial-advisor) |  Assists human financial advisors by providing educational content about topics related to finance and investments.  |   Risk Analysis, Strategy Generation, Summarization, Report generation  | Workflow | Easy | Multi Agent | Financial Services            |
-| [FOMC Research Agent](fomc-research) | Market event analysis                                                                                                                   |   Summarization, Report generation  | Workflow | Advanced | Multi Agent | Financial Services            |
-| [Gemini Fullstack](gemini-fullstack) | A blueprint for building a sophisticated, fullstack research agent with Gemini. Demonstrates complex agentic workflows, modular agents, and Human-in-the-Loop (HITL) steps. | Multi-agent, Function calling, Web search, React frontend, FastAPI backend, Human-in-the-Loop | Workflow | Advanced | Multi Agent | Horizontal |
-| [LLM Auditor](llm-auditor)                   | Chatbot Response Verification, Content Auditing                                                                                         |   Gemini with Google Search, Multi-agent  | Workflow         | Easy       | Multi Agent  | Horizontal                    |
-| [Marketing Agency](marketing-agency)                   | Streamlines new website and product launches. Identifies optimal DNS domains, generates entire websites, develops marketing strategies, and designs brand assets. | Content generation, Website creation, Code generation, Strategy development  | Workflow         | Easy       | Multi Agent  | Horizontal                    |
-| [Medical Pre-Authorization](medical-pre-authorization)                   | Automates the pre-authorization process by analyzing medical records and health policies to instantly determine coverage and eligibility. | Custom tool, Document Analysis, Report Generation  | Conversational         | Intermediate       | Multi Agent  | Healthcare                    |
-| [Personalized Shopping](personalized-shopping) | Product Recommendations                                                                                                               | E-commerce, Personalized agent, Shopping assistant, Single-agent, Product recommendation, Product discovery, Chatbot    | Conversational         | Easy        | Single Agent     | E-commerce                    |
-| [Vertex AI Retrieval Agent](RAG) | RAG Powered Agent / Answering questions related to documents uploaded to Vertex AI RAG Engine, providing informative responses with citations to source materials.                              |  RAG engine   | Workflow              | Intermediate        | Single Agent       | Horizontal                    |
-| [Safety Guardrail Plugins](safety-plugins) | Safety filter plugins: Gemini as a judge, Model Armor as a filter                              |  Plugin, Security, Guardrail, Jailbreak, Multiagent   | Conversational/Workflow              | Intermediate        | Plugin       | Safety &Security                    |
-| [Software Bug Assistant](software-bug-assistant)         | Assists in software bug resolution by querying internal ticketing systems and external knowledge sources (GitHub, StackOverflow, Google Search) to find similar issues and diagnostics. | RAG, MCP, Bug Tracking, Google Search, IT Support, Database Integration, API  | Workflow/Conversational | Intermediate | Single Agent | Horizontal / IT Support            |
-| [Travel Concierge](travel-concierge) | Travel Concierge, Digital Tasks Assistant                                                                                               |   Function tool (Python), Custom tool, Agent tool, Input and output schema, Updatable context, Dynamic instructions  | Conversational | Advanced | Multi Agent | Travel                        |
-| [Auto Insurance Agent](auto-insurance-agent) | Auto Insurance Agent to manage members, claims, rewards and roadside assistance.                                                                                              |   [Apigee](https://cloud.google.com/apigee/docs/api-platform/get-started/what-apigee), [Apigee API hub](https://cloud.google.com/apigee/docs/apihub/what-is-api-hub), Agent Tool  | Conversational | Easy | Multi Agent | Financial Services       
-| [Image Scoring](image-scoring) | Image scoring agent to generate images based on policies and score the generated images to measure policy compliance.  | Function tool (Python), Agent tool, Imagen, Loop Agent | Conversational | Easy       | Multi Agent  | Horizontal 
-| [Incident Management](incident-management) | This agent sample showcases the utilization of dynamic identity propagation with ServiceNow and [Application Integration Connectors](https://cloud.google.com/application-integration/docs/using-integration-connectors)                                                                                              |   [Application Integration](https://cloud.google.com/application-integration/docs/overview), [Integration Connectors](https://cloud.google.com/integration-connectors/docs/overview), Agent Tool  | Conversational | Easy | Single Agent | Customer Support
-| [Order Processing](order-processing) | This agent sample showcases how [Application Integration Connectors](https://cloud.google.com/application-integration/docs/using-integration-connectors) can be leveraged to automate orders and include human in the loop for workflows |   [Application Integration](https://cloud.google.com/application-integration/docs/overview), [Integration Connectors](https://cloud.google.com/integration-connectors/docs/overview), Agent Tool  | Conversational | Easy | Single Agent | Order Management
-| [Google Trends Agent](google-trends-agent) | Surfaces top trending search terms from Google Trends using BigQuery dataset. Shows trending topics by region and time period. | BigQuery, Trend analysis, Sequential agent | Conversational | Medium | Sequential Agent | Marketing & Analytics |
-
+| [Base ReAct Agent (ADK)](adk-base) | A foundational ReAct agent using the Python Agent Development Kit (ADK). | Base agent, ReAct, Deployment | Conversational | Easy | Single Agent | Horizontal |
+| [Multimodal Live Agent](adk-live) | Real-time multimodal RAG agent showcasing live streaming and bidirectional audio/text. | Multimodal, Live streaming, BIDI, RAG | Conversational | Advanced | Single Agent | Horizontal |
+| [Agentic RAG](agentic-rag) | A RAG agent designed for document retrieval and Q&A using Vertex AI Search. | RAG, Vector Search, Ingestion | Conversational | Intermediate | Single Agent | Horizontal |
+| [Co-Scientist Agent](coscientist) | Multi-agent research platform built with Gemini and Co-Scientist. | Co-scientist, Research, Multi-agent | Workflow | Advanced | Multi Agent | Horizontal |
+| [Data Science Agent](data_science) | A multi-agent system designed for sophisticated data analysis, analytics, and SQL queries. | Python Tool, NL2SQL, BigQuery, Analytics | Conversational | Advanced | Multi Agent | Horizontal |
+| [Data Viz Agent](data_viz_agent) | Agent that analyzes datasets and generates beautiful, insightful visual charts. | Data viz, Python Tool, Matplotlib | Conversational | Intermediate | Single Agent | Horizontal |
+| [RAG Agent](rag-agent) | Production RAG agent for document QA with Google Cloud integration. | RAG, Search, Grounding | Conversational | Intermediate | Single Agent | Horizontal |
+| [Travel Concierge](travel_concierge) | Conversational multi-agent travel planning assistant with rich schema constraints and updatable context. | Booking, Inspiration, Multi-agent | Conversational | Advanced | Multi Agent | Travel |
 
 
 ## Using the Agents in this Repository
 
 This section provides general guidance on how to run, test, evaluate, and potentially deploy the agent samples found in this repository. While the core steps are similar, **each agent has its own specific requirements and detailed instructions within its dedicated `README.md` file.**
 
-**Always consult the `README.md` inside the specific agent's directory (e.g., `agents/fomc-research/README.md`) for the most accurate and detailed steps.**
+**Always consult the `README.md` inside the specific agent's directory (e.g., `agents/rag-agent/README.md`) for the most accurate and detailed steps.**
 
 Here's a general workflow you can expect:
 
@@ -68,8 +54,8 @@ Here's a general workflow you can expect:
 2.  **Navigate to the Agent Directory:** Open your terminal and change into the
     agent's main directory from the main repo directory:
     ```bash
-    cd python/agents/<agent-name>
-    # Example: cd python/agents/fomc-research
+    cd agents/<agent-name>
+    # Example: cd agents/rag-agent
     ```
 3.  **Review the Agent's README:** **This is the most crucial step.** Open the
     `README.md` file within this directory. It will contain:
@@ -85,10 +71,9 @@ Here's a general workflow you can expect:
     *   **Prerequisites:** Ensure you've met the general prerequisites listed in
         the main "Getting Started" section *and* any specific prerequisites
         mentioned in the agent's README.
-    *   **Dependencies:** Install the agent's specific Python dependencies using
-        Poetry (this command is usually run from the agent's main directory):
+    *   **Dependencies:** Install the agent's specific Python dependencies:
         ```bash
-        poetry install
+        uv sync
         ```
     *   **Environment Variables:** Most agents require configuration via
         environment variables. Copy the `.env.example` file to `.env` within the
@@ -103,17 +88,17 @@ Here's a general workflow you can expect:
         the ADK CLI or ADK Dev UI. The specific command might vary slightly
         (e.g., the exact directory to run from), so check the agent's README.
         **CLI:** Often involves running `adk run .` from within the agent's
-        *core code* directory (e.g., `agents/fomc-research/fomc_research/`).
+        *core code* directory (e.g., `agents/rag-agent/app/`).
         ```bash
         # Example (check agent's README for exact path)
-        cd agents/fomc-research/fomc_research/
+        cd agents/rag-agent/app/
         adk run .
         ```
     *   **ADK Dev UI:** Often involves running `adk web .` from the agent's
-        *main* directory (e.g., `agents/fomc-research/`).
+        *main* directory (e.g., `agents/rag-agent/`).
         ```bash
         # Example (check agent's README for exact path)
-        cd agents/fomc-research/
+        cd agents/rag-agent/
         adk web
         ```
         Then, open the provided URL in your browser and select the agent from the dropdown menu.
