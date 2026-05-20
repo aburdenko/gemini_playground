@@ -35,10 +35,17 @@ AGENT_DESCRIPTION="This agent was deployed via ADK to Agent Engine and published
 # ==========================================
 # 2. Authenticate
 # ==========================================
-echo "Authenticating gcloud with Service Account: $SA_EMAIL..."
-gcloud auth activate-service-account "$SA_EMAIL" --key-file="$SERVICE_ACCOUNT_KEY_FILE"
+if [ -z "$SERVICE_ACCOUNT_KEY_FILE" ] || [ ! -f "$SERVICE_ACCOUNT_KEY_FILE" ]; then
+  echo "WARNING: Service Account key file ('$SERVICE_ACCOUNT_KEY_FILE') not found or invalid."
+  echo "Falling back to active gcloud credentials (Application Default Credentials)."
+  unset GOOGLE_APPLICATION_CREDENTIALS
+else
+  echo "Authenticating gcloud with Service Account: $SA_EMAIL..."
+  gcloud auth activate-service-account "$SA_EMAIL" --key-file="$SERVICE_ACCOUNT_KEY_FILE"
+  export GOOGLE_APPLICATION_CREDENTIALS="$SERVICE_ACCOUNT_KEY_FILE"
+fi
+
 gcloud config set project "$PROJECT_ID"
-export GOOGLE_APPLICATION_CREDENTIALS="$SERVICE_ACCOUNT_KEY_FILE"
 
 if [[ "$STAGING_GCS_BUCKET" != gs://* ]]; then
     STAGING_GCS_BUCKET="gs://$STAGING_GCS_BUCKET"

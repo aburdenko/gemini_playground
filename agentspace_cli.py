@@ -1,3 +1,10 @@
+import os
+# Sanitize GOOGLE_APPLICATION_CREDENTIALS to prevent DefaultCredentialsError on Cloud Shell
+for var in ["GOOGLE_APPLICATION_CREDENTIALS", "SERVICE_ACCOUNT_KEY_FILE"]:
+    val = os.environ.get(var)
+    if val and not os.path.exists(val):
+        os.environ.pop(var, None)
+
 import argparse
 import sys
 import logging

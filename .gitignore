@@ -19,3 +19,5 @@ agents/.backup_*
 tmp/
 output.log
 **/toolbox
+__pycache__/agentspace_cli.cpython-312.pyc
+agents/data_viz_agent/.adk/session.db

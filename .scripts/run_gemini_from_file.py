@@ -2,6 +2,12 @@
 # Run with python3 ./.scripts/run_gemini_from_file.py suggested-prompt-2025-06-29.md
 
 import os
+# Sanitize GOOGLE_APPLICATION_CREDENTIALS to prevent DefaultCredentialsError on Cloud Shell
+for var in ["GOOGLE_APPLICATION_CREDENTIALS", "SERVICE_ACCOUNT_KEY_FILE"]:
+    val = os.environ.get(var)
+    if val and not os.path.exists(val):
+        os.environ.pop(var, None)
+
 import sys
 import argparse
 import uuid

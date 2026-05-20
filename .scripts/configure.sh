@@ -79,6 +79,19 @@ fi
 # 1. Service Account specified in .env (SERVICE_ACCOUNT_KEY_FILE)
 # 2. User's Application Default Credentials (ADC) via gcloud
 
+# --- Step 0: Sanitize credentials to prevent DefaultCredentialsError on Cloud Shell ---
+if [ -n "$GOOGLE_APPLICATION_CREDENTIALS" ] && [ ! -f "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
+  echo "WARNING: GOOGLE_APPLICATION_CREDENTIALS points to a non-existent file or broken symlink: $GOOGLE_APPLICATION_CREDENTIALS"
+  echo "Unsetting GOOGLE_APPLICATION_CREDENTIALS to allow fallback authentication."
+  unset GOOGLE_APPLICATION_CREDENTIALS
+fi
+
+if [ -n "$SERVICE_ACCOUNT_KEY_FILE" ] && [ ! -f "$SERVICE_ACCOUNT_KEY_FILE" ]; then
+  echo "WARNING: SERVICE_ACCOUNT_KEY_FILE points to a non-existent file or broken symlink: $SERVICE_ACCOUNT_KEY_FILE"
+  echo "Unsetting SERVICE_ACCOUNT_KEY_FILE."
+  unset SERVICE_ACCOUNT_KEY_FILE
+fi
+
 echo "--- Configuring Google Cloud Authentication & Project ---"
 
 # --- Step 1: Check for Service Account ---

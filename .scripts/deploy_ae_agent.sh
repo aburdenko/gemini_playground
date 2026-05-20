@@ -26,16 +26,18 @@ fi
 # ==========================================
 # 1. Authenticate via gcloud
 # ==========================================
-echo "Authenticating gcloud with Service Account: $SA_EMAIL..."
-gcloud auth activate-service-account "$SA_EMAIL" --key-file="$SERVICE_ACCOUNT_KEY_FILE"
+if [ -z "$SERVICE_ACCOUNT_KEY_FILE" ] || [ ! -f "$SERVICE_ACCOUNT_KEY_FILE" ]; then
+  echo "WARNING: Service Account key file ('$SERVICE_ACCOUNT_KEY_FILE') not found or invalid."
+  echo "Falling back to active gcloud credentials (Application Default Credentials)."
+  unset GOOGLE_APPLICATION_CREDENTIALS
+else
+  echo "Authenticating gcloud with Service Account: $SA_EMAIL..."
+  gcloud auth activate-service-account "$SA_EMAIL" --key-file="$SERVICE_ACCOUNT_KEY_FILE"
+  export GOOGLE_APPLICATION_CREDENTIALS="$SERVICE_ACCOUNT_KEY_FILE"
+fi
 
 echo "Setting target Google Cloud project to: $PROJECT_ID..."
 gcloud config set project "$PROJECT_ID"
-
-# ==========================================
-# 2. Set Application Default Credentials (ADC)
-# ==========================================
-export GOOGLE_APPLICATION_CREDENTIALS="$SERVICE_ACCOUNT_KEY_FILE"
 
 
 # ==========================================
