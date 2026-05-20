@@ -377,4 +377,4 @@ uv tool install google-agents-cli
 
 unset GOOGLE_API_KEY GEMINI_API_KEY
 alias gemini="gemini -m $GEMINI_MODEL_NAME --yolo"
-npx skills install -y -g github.com/google/skills
+npx --yes skills install -y -g github.com/google/skills
