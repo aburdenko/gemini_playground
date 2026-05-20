@@ -704,10 +704,6 @@ def main():
         print("Moving evalset files to the eval_sets folder...")
         script_dir = os.path.dirname(__file__)
         move_script_path = os.path.join(script_dir, "move_evalsets.sh")
-        if not os.path.exists(move_script_path):
-             # Fallback path assuming .scripts directory
-             move_script_path = "/home/user/gemini_playground/.scripts/move_evalsets.sh"
-        
         if os.path.exists(move_script_path):
             os.system(move_script_path)
         else:
