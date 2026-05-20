@@ -362,7 +362,7 @@ adkweb() {
 
 export PATH=$PATH:$HOME/.local/bin:.scripts
 
-uv tool install agent-starter-pack
+uv tool install google-agents-cli
 
 (type -p wget >/dev/null || (sudo apt update && sudo apt install wget -y)) \
         && sudo apt update && sudo apt install xvfb libxkbcommon0 -y \
