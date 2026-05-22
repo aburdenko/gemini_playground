@@ -1,5 +1,18 @@
 # Usage: source .scripts/configure.sh
 
+# --- Antigravity CLI Verification ---
+if [ -f "/app/antigravity" ]; then
+    echo "Antigravity CLI verified at /app/antigravity."
+    export PATH="/app:$PATH"
+elif [ -f "$HOME/.local/bin/agy" ]; then
+    echo "Antigravity CLI verified at $HOME/.local/bin/agy."
+    export PATH="$HOME/.local/bin:$PATH"
+elif command -v antigravity &> /dev/null; then
+    echo "Antigravity CLI verified on PATH."
+else
+    echo "Warning: Antigravity CLI not found." >&2
+fi
+
 # --- Gemini CLI Installation/Update ---
 if ! command -v npm &> /dev/null; then
   echo "Error: npm is not installed. Please install Node.js and npm to continue." >&2
@@ -13,7 +26,7 @@ if ! command -v gemini &> /dev/null; then
   echo "Gemini CLI not found. Installing the latest version ($LATEST_VERSION)..."
   sudo npm install -g @google/gemini-cli@latest
 else
-  # Extract vergeminision from `npm list`, which is more reliable than `gemini --version`
+  # Extract version from `npm list`, which is more reliable than `gemini --version`
   INSTALLED_VERSION=$(npm list -g @google/gemini-cli --depth=0 2>/dev/null | grep '@google/gemini-cli' | sed 's/.*@//')
   if [ "$INSTALLED_VERSION" == "$LATEST_VERSION" ]; then
     echo "Gemini CLI is already up to date (version $INSTALLED_VERSION)."
@@ -402,7 +415,7 @@ export PATH=$PATH:$HOME/.local/bin:.scripts
 uv tool install google-agents-cli
 
 (type -p wget >/dev/null || (sudo apt update && sudo apt install wget -y)) \
-        && sudo apt update && sudo apt install xvfb libxkbcommon0 -y \
+        && sudo apt update && sudo apt install xvfb libxkbcommon0 libgtk-3-0 -y \
         && sudo mkdir -p -m 755 /etc/apt/keyrings \
         && out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg \
         && cat $out | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
@@ -413,5 +426,66 @@ uv tool install google-agents-cli
         && sudo apt install gh -y
 
 unset GOOGLE_API_KEY GEMINI_API_KEY
-alias gemini="gemini -m $GEMINI_MODEL_NAME --yolo"
+# Alias gemini and agy to their respective CLIs with explicit auto-login project binding
+if command -v antigravity &> /dev/null; then
+    alias agy="PROJECT_ID=\$PROJECT_ID GOOGLE_CLOUD_PROJECT=\$PROJECT_ID antigravity"
+elif command -v agy &> /dev/null; then
+    alias agy="PROJECT_ID=\$PROJECT_ID GOOGLE_CLOUD_PROJECT=\$PROJECT_ID agy"
+fi
+
+if command -v gemini &> /dev/null; then
+    alias gemini="gemini -m $GEMINI_MODEL_NAME --yolo"
+fi
 npx --yes skills install -y -g github.com/google/skills
+
+
+# --- Auto-configure Google Drive with rclone with interactive opt-out ---
+if [ ! -f "$HOME/.config/rclone/rclone.conf" ] && [ ! -f "$HOME/.config/rclone/.gdrive_opt_out" ]; then
+    echo ""
+    echo "============================================================"
+    echo "Would you like to mount your Google Drive? (y/n)"
+    echo "============================================================"
+    read -p "Your choice [y/n]: " choice
+    case "$choice" in 
+        [yY]|[yY][eE][sS])
+            echo ""
+            echo "Ensuring rclone and fuse3 are installed..."
+            if ! command -v rclone &> /dev/null || ! command -v fusermount3 &> /dev/null; then
+                sudo apt-get update && sudo apt-get install -y rclone fuse3
+            fi
+            echo "Let's configure rclone now so your Google Drive auto-mounts on startup!"
+            echo "Please follow the interactive prompts (name the remote 'gdrive'):"
+            echo ""
+            mkdir -p "$HOME/.config/rclone"
+            rclone config
+            ;;
+        *)
+            echo ""
+            echo "Skipping Google Drive auto-mount. We won't prompt you again."
+            echo "If you want to configure it later, simply run 'rclone config'."
+            mkdir -p "$HOME/.config/rclone"
+            touch "$HOME/.config/rclone/.gdrive_opt_out"
+            ;;
+    esac
+elif [ -f "$HOME/.config/rclone/rclone.conf" ]; then
+    echo "Google Drive configuration verified (~/.config/rclone/rclone.conf)."
+fi
+
+# --- Mount Google Drive if configured and not already mounted ---
+if [ -f "$HOME/.config/rclone/rclone.conf" ]; then
+    # Ensure rclone and fuse3 are installed if rclone.conf exists but they aren't
+    if ! command -v rclone &> /dev/null || ! command -v fusermount3 &> /dev/null; then
+        echo "Ensuring rclone and fuse3 are installed..."
+        sudo apt-get update && sudo apt-get install -y rclone fuse3
+    fi
+
+    if ! mount | grep -q " /mnt/gdrive "; then
+        echo "Creating mount point /mnt/gdrive..."
+        sudo mkdir -p /mnt/gdrive
+        sudo chown -R $(whoami):$(whoami) /mnt/gdrive
+        echo "Mounting Google Drive to /mnt/gdrive..."
+        rclone mount gdrive: /mnt/gdrive --daemon --vfs-cache-mode writes
+    else
+        echo "Google Drive is already mounted at /mnt/gdrive."
+    fi
+fi
