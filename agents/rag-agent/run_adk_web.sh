@@ -1,5 +1,6 @@
 #!/bin/bash
+set -euo pipefail
 
-source /home/user/gemini_playground/.venv/python3.12/bin/activate
-
-adk web /home/user/gemini_playground/agents/rag-agent/
+REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+cd "$REPO_ROOT/agents"
+uv run adk web rag-agent
